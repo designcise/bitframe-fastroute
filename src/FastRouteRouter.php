@@ -20,7 +20,7 @@ use \FastRoute\RouteCollector;
 use BitFrame\Application;
 use BitFrame\Delegate\CallableMiddlewareTrait;
 use BitFrame\Dispatcher\DispatcherAwareTrait;
-use BitFrame\Router\{Route, RouterTrait, RouterInterface, RouteCollection};
+use BitFrame\Router\{Route, RouterTrait, RouterInterface, RouteCollection, RouteCollectionInterface};
 
 /**
  * FastRoute wrapper class to manage http routes
