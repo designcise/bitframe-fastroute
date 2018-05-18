@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": ">=7.1.0",
+        "designcise/bitframe": "^1.0.0",
 		"psr/http-server-middleware": "~1.0",
 		"nikic/fast-route": "^1.3"
     },
