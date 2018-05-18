@@ -1,6 +1,6 @@
 {
     "name": "designcise/bitframe-fastroute",
-	"version": "1.0.1",
+    "version": "1.0.1",
     "type": "library",
     "description": "FastRoute router middleware for BitFrame microframework",
     "license": "MIT",
@@ -13,8 +13,8 @@
     "require": {
         "php": ">=7.1.0",
         "designcise/bitframe": "^1.0.0",
-		"psr/http-server-middleware": "~1.0",
-		"nikic/fast-route": "^1.3"
+        "psr/http-server-middleware": "~1.0",
+        "nikic/fast-route": "^1.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.4"
