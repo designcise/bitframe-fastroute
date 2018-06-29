@@ -70,12 +70,22 @@ class FastRouteRouter implements RouterInterface
         
         // process routes
         $dispatcher = new \FastRoute\Dispatcher\GroupCountBased($this->routeCollector->getData());
+
+        $reqUriPath = $request->getUri()->getPath();
+        
+        // workaround for when using subfolders as the root folder; this would make 
+        // folder containing the main 'index.php' file the root, which is the expected
+        // behavior
+        if (($index = strpos($_SERVER['PHP_SELF'], '/index.php')) !== false && $index > 0) {
+            $script_url = strtolower(substr($_SERVER['PHP_SELF'], 0, $index));
+            $reqUriPath = '/' . trim(str_replace(['/index.php', $script_url], '', $reqUriPath), '/');
+        }
         
         // dispatch request; returns:
             // 1: int $route[0] Route resolution status 
             // 2: callable $route[1] Route callback|array
             // 3: vars $routeInfo[2] Route params
-        $route = $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
+        $route = $dispatcher->dispatch($request->getMethod(), $reqUriPath);
         
         // manage request/response
         if ($route[0] === Dispatcher::FOUND) {
