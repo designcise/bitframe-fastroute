@@ -6,7 +6,7 @@
  * @author    Daniyal Hamid
  * @copyright Copyright (c) 2017-2018 Daniyal Hamid (https://designcise.com)
  *
- * @license   https://github.com/designcise/bitframe/blob/master/LICENSE.md MIT License
+ * @license   https://github.com/designcise/bitframe-fastroute/blob/master/LICENSE.md MIT License
  */
 
 namespace BitFrame\Test;
@@ -32,7 +32,7 @@ class FastRouteRouterTest extends TestCase
     
     public function setUp()
     {
-        $this->request = HttpMessageFactory::createServerRequestFromArray();
+        $this->request = HttpMessageFactory::createServerRequestFromArray($_SERVER);
         $this->router = new \BitFrame\Router\FastRouteRouter();
     }
     
