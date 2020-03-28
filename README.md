@@ -1,50 +1,54 @@
-# BitFrame\Router\FastRouteRouter
+# BitFrame\FastRoute
 
 FastRoute wrapper class to manage http routes as a middleware.
 
-### Installation
+## Installation
 
-See [installation docs](https://www.bitframephp.com/middleware/router/fastroute) for instructions on installing and using this middleware.
-
-### Usage Example
+Install using composer:
 
 ```
-use \BitFrame\Router\FastRouteRouter;
+$ composer require designcise/bitframe-fastroute
+```
+
+Please note that this package requires PHP 7.4.0 or newer.
+
+## Usage Example
+
+```
+use BitFrame\App;
+use BitFrame\Emitter\SapiEmitter;
+use BitFrame\FastRoute\Router;
 
 require 'vendor/autoload.php';
 
-$app = new \BitFrame\Application;
+$app = new App();
+$router = new Router();
 
-$app->map(['GET', 'POST'], '/test', function ($request, $response, $next) {
-    $response->getBody()->write('Test Page');
-    
-    return $response;
+$router->map(['GET', 'POST'], '/test', function ($request, $handler) {
+    $handler->write('Test Page');
+    return $handler->handle($request);
 });
 
 $app->run([
-    /* In order to output response from the router (or router middleware), 
-     * make sure you include a response emitter middleware, for example:
-     * \BitFrame\Message\DiactorosResponseEmitter::class, */
-    // router should normally be the last middleware to run
-    FastRouteRouter::class
+    SapiEmitter::class,
+    $router,
+    // ...
 ]);
 ```
 
-### Tests
+## Tests
 
 To execute the test suite, you will need [PHPUnit](https://phpunit.de/).
 
-### Contributing
+## Contributing
 
 * File issues at https://github.com/designcise/bitframe-fastroute/issues
 * Issue patches to https://github.com/designcise/bitframe-fastroute/pulls
 
-### Documentation
+## Documentation
 
-Documentation is available at:
+Complete documentation for v2.0 will be available soon.
 
-* https://www.bitframephp.com/middleware/router/fastroute/
-
-### License
+## License
 
 Please see [License File](LICENSE.md) for licensing information.
