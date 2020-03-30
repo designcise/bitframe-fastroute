@@ -25,8 +25,9 @@ $app = new App();
 $router = new Router();
 
 $router->map(['GET', 'POST'], '/test', function ($request, $handler) {
-    $handler->write('Test Page');
-    return $handler->handle($request);
+    $response = $handler->handle($request);
+    $response->getBody()->write('Test Page');
+    return $response;
 });
 
 $app->run([
