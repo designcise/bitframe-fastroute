@@ -70,4 +70,16 @@ class Router extends AbstractRouter implements MiddlewareInterface
     {
         return $this->routeCollection;
     }
+
+    /**
+     * @param mixed $routeHandler
+     *
+     * @return boolean
+     */
+    protected function isClassName($routeHandler): bool
+    {
+        return is_string($routeHandler)
+            && strpos($routeHandler, '::') === false
+            && class_exists($routeHandler);
+    }
 }
