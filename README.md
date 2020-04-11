@@ -1,5 +1,8 @@
 # BitFrame\FastRoute
 
+[![codecov](https://codecov.io/gh/designcise/bitframe-fastroute/branch/2.x/graph/badge.svg)](https://codecov.io/gh/designcise/bitframe-fastroute)
+[![Build Status](https://travis-ci.org/designcise/bitframe-fastroute.svg?branch=2.x)](https://travis-ci.org/designcise/bitframe-fastroute)
+
 FastRoute wrapper class to manage http routes as a middleware.
 
 ## Installation
