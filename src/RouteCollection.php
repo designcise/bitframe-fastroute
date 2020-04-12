@@ -18,6 +18,24 @@ use BitFrame\FastRoute\Exception\{
     BadRouteException
 };
 
+use function strlen;
+use function rtrim;
+use function is_string;
+use function substr;
+use function count;
+use function trim;
+use function implode;
+use function array_map;
+use function array_chunk;
+use function round;
+use function ceil;
+use function max;
+use function sprintf;
+use function str_repeat;
+use function preg_split;
+use function preg_match;
+use function preg_match_all;
+
 /**
  * Stores parsed routes.
  */
@@ -55,7 +73,7 @@ REGEX;
 
         foreach ($methods as $method) {
             foreach ($routePathTokens as $path) {
-                if (\count($path) === 1 && \is_string($path[0])) {
+                if (count($path) === 1 && is_string($path[0])) {
                     $this->addStaticRoute($method, $path[0], $handler);
                 } else {
                     $this->addVariableRoute($method, $path, $handler);
@@ -72,18 +90,18 @@ REGEX;
      */
     public function parsePath(string $route): array
     {
-        $routeWithoutClosingOptionals = \rtrim($route, ']');
-        $numOptionals = \strlen($route) - \strlen($routeWithoutClosingOptionals);
+        $routeWithoutClosingOptionals = rtrim($route, ']');
+        $numOptionals = strlen($route) - strlen($routeWithoutClosingOptionals);
 
         // split on `[` while skipping placeholders
-        $segments = \preg_split(
+        $segments = preg_split(
             '~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \[~x', $routeWithoutClosingOptionals
         );
 
-        if ($numOptionals !== \count($segments) - 1) {
+        if ($numOptionals !== count($segments) - 1) {
             // if there are any `]` in the middle of the route, throw a more specific error message
             if (
-                \preg_match('~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \]~x', $routeWithoutClosingOptionals)
+                preg_match('~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \]~x', $routeWithoutClosingOptionals)
             ) {
                 throw new BadRouteException(
                     'Optional segments (i.e. parts enclosed within `[]`) can only occur at the end of a route'
@@ -149,7 +167,7 @@ REGEX;
             }
         }
 
-        if (\count($this->getAllowedMethods($uri))) {
+        if (count($this->getAllowedMethods($uri))) {
             throw new MethodNotAllowedException($method);
         }
 
@@ -191,7 +209,7 @@ REGEX;
     private function addStaticRoute(string $method, string $path, $handler): void
     {
         if (isset($this->staticRoutes[$method][$path])) {
-            throw new BadRouteException(\sprintf(
+            throw new BadRouteException(sprintf(
                 'Cannot register two routes matching "%s" for method "%s"',
                 $path, $method
             ));
@@ -199,8 +217,8 @@ REGEX;
 
         if (isset($this->variableRoutes[$method])) {
             foreach ($this->variableRoutes[$method] as $route) {
-                if (\preg_match('~^' . $route['regex'] . '$~', $path)) {
-                    throw new BadRouteException(\sprintf(
+                if (preg_match('~^' . $route['regex'] . '$~', $path)) {
+                    throw new BadRouteException(sprintf(
                         'Static route "%s" is shadowed by previously defined variable route "%s" for method "%s"',
                         $path, $route['regex'], $method
                     ));
@@ -230,7 +248,7 @@ REGEX;
         [$regex, $vars] = self::buildRegexForRoute($pathData);
 
         if (isset($this->variableRoutes[$method][$regex])) {
-            throw new BadRouteException(\sprintf(
+            throw new BadRouteException(sprintf(
                 'Cannot register two routes matching "%s" for method "%s"',
                 $regex, $method
             ));
@@ -254,7 +272,7 @@ REGEX;
         // needs to have at least a ( to contain a capturing group
         return \strpos($regex, '(') !== false 
             // semi-accurate detection for capturing groups
-            && (bool) \preg_match(
+            && (bool) preg_match(
                 '~
                     (?:
                         \(\?\(
@@ -284,7 +302,7 @@ REGEX;
         $vars = [];
 
         foreach ($routeData as $pathSegment) {
-            if (\is_string($pathSegment)) {
+            if (is_string($pathSegment)) {
                 $regex .= \preg_quote($pathSegment, '~');
                 continue;
             }
@@ -292,13 +310,13 @@ REGEX;
             [$varName, $regexPart] = $pathSegment;
 
             if (isset($vars[$varName])) {
-                throw new BadRouteException(\sprintf(
+                throw new BadRouteException(sprintf(
                     'Cannot use the same placeholder "%s" twice', $varName
                 ));
             }
 
             if (self::regexHasCapturingGroups($regexPart)) {
-                throw new BadRouteException(\sprintf(
+                throw new BadRouteException(sprintf(
                     'Regex "%s" for parameter "%s" contains a capturing group',
                     $regexPart, $varName
                 ));
@@ -321,7 +339,7 @@ REGEX;
     private static function parseRouteTokens(string $routePattern): array
     {
         // check if any placeholders (i.e. `{}`) exist
-        if (! \preg_match_all(
+        if (! preg_match_all(
             '~' . self::PLACEHOLDER_REGEX . '~x', $routePattern, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER
         )) {
             return [$routePattern];
@@ -335,21 +353,21 @@ REGEX;
             $offset = $match[0][1];
 
             if ($offset > $index) {
-                $routeTokens[] = \substr($routePattern, $index, $offset - $index);
+                $routeTokens[] = substr($routePattern, $index, $offset - $index);
             }
 
             $routeTokens[] = [
                 // path
                 $match[1][0],
                 // pattern
-                isset($match[2][0]) ? \trim($match[2][0]) : '[^/]+',
+                isset($match[2][0]) ? trim($match[2][0]) : '[^/]+',
             ];
             
-            $index = $offset + \strlen($match[0][0]);
+            $index = $offset + strlen($match[0][0]);
         }
 
-        if ($index !== \strlen($routePattern)) {
-            $routeTokens[] = \substr($routePattern, $index);
+        if ($index !== strlen($routePattern)) {
+            $routeTokens[] = substr($routePattern, $index);
         }
 
         return $routeTokens;
@@ -367,10 +385,10 @@ REGEX;
         $numGroups = 0;
 
         foreach ($routeMap as $regex => $route) {
-            $numVariables = \count($route['vars']);
-            $numGroups = \max($numGroups, $numVariables);
+            $numVariables = count($route['vars']);
+            $numGroups = max($numGroups, $numVariables);
 
-            $regexes[] = $regex . \str_repeat('()', $numGroups - $numVariables);
+            $regexes[] = $regex . str_repeat('()', $numGroups - $numVariables);
             $routeMapCollection[$numGroups + 1] = [
                 'handler' => $route['handler'],
                 'vars' => $route['vars']
@@ -380,7 +398,7 @@ REGEX;
         }
 
         return [
-            'regex' => '~^(?|' . \implode('|', $regexes) . ')$~',
+            'regex' => '~^(?|' . implode('|', $regexes) . ')$~',
             'routeMap' => $routeMapCollection
         ];
     }
@@ -399,12 +417,12 @@ REGEX;
 
         if (! empty($routeData)) {
             $approxChunkSize = 10;
-            $count = \count($routeData);
-            $numParts = \max(1, \round($count / $approxChunkSize));
-            $chunkSize = (int) \ceil($count / $numParts);
-            $chunks = \array_chunk($routeData, $chunkSize, true);
+            $count = count($routeData);
+            $numParts = max(1, round($count / $approxChunkSize));
+            $chunkSize = (int) ceil($count / $numParts);
+            $chunks = array_chunk($routeData, $chunkSize, true);
 
-            $data[$method] = \array_map('self::processRouteChunks', $chunks);
+            $data[$method] = array_map('self::processRouteChunks', $chunks);
         }
 
         return $data;
@@ -423,11 +441,11 @@ REGEX;
 
         if (isset($generatedRouteData[$method])) {
             foreach ($generatedRouteData[$method] as $data) {
-                if (! \preg_match($data['regex'], $uri, $matches)) {
+                if (! preg_match($data['regex'], $uri, $matches)) {
                     continue;
                 }
 
-                $routeMap = $data['routeMap'][\count($matches)];
+                $routeMap = $data['routeMap'][count($matches)];
 
                 $vars = [];
                 $i = 0;
