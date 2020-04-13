@@ -15,6 +15,7 @@ namespace BitFrame\FastRoute\Test;
 use PHPUnit\Framework\TestCase;
 use BitFrame\FastRoute\RouteCollection;
 use BitFrame\FastRoute\Exception\{
+    MethodNotAllowedException,
     RouteNotFoundException,
     BadRouteException
 };
@@ -318,9 +319,34 @@ class RouteCollectionTest extends TestCase
                 ['GET', '/hello/1234'],
                 ['id' => '1234']
             ],
+            'HEAD request' => [
+                [['HEAD'], '/hello/{id:\d+}'],
+                ['HEAD', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'fallback on fallback routes (if available) when nothing matches' => [
+                [['*'], '/hello/{id:\d+}'],
+                ['GET', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'HEAD request falls back to GET if no HEAD data found' => [
+                [['GET', 'POST'], '/hello/{id:\d+}'],
+                ['HEAD', '/hello/1234'],
+                ['id' => '1234']
+            ],
             '2-level deep route with variable' => [
                 [['PUT'], '/hello/{name}'],
                 ['PUT', '/hello/john'],
+                ['name' => 'john']
+            ],
+            'fallback routes (when nothing matches) for 2-level deep route with variable' => [
+                [['*'], '/hello/{name}'],
+                ['PUT', '/hello/john'],
+                ['name' => 'john']
+            ],
+            'HEAD fallsback on GET for 2-level deep route with variable' => [
+                [['GET'], '/hello/{name}'],
+                ['HEAD', '/hello/john'],
                 ['name' => 'john']
             ],
             'n-level deep route with variable' => [
@@ -328,12 +354,42 @@ class RouteCollectionTest extends TestCase
                 ['POST', '/hello/john/jane/doe'],
                 ['name' => 'john/jane/doe']
             ],
+            'fallback routes (when nothing matches) for n-level deep route with variable' => [
+                [['*'], '/hello/{name:.+}'],
+                ['POST', '/hello/john/jane/doe'],
+                ['name' => 'john/jane/doe']
+            ],
+            'HEAD fallback on GET for n-level deep route with variable' => [
+                [['GET', 'POST'], '/hello/{name:.+}'],
+                ['HEAD', '/hello/john/jane/doe'],
+                ['name' => 'john/jane/doe']
+            ],
             'optional path requested with optional provided' => [
                 [['DELETE'], '/hello/{id:\d+}[/{name}]'],
                 ['DELETE', '/hello/1234/john'],
                 ['id' => '1234', 'name' => 'john']
             ],
+            'fallback routes (when nothing matches) for optional path requested with optional provided' => [
+                [['*'], '/hello/{id:\d+}[/{name}]'],
+                ['DELETE', '/hello/1234/john'],
+                ['id' => '1234', 'name' => 'john']
+            ],
+            'HEAD fallback on GET for optional path requested with optional provided' => [
+                [['GET'], '/hello/{id:\d+}[/{name}]'],
+                ['HEAD', '/hello/1234/john'],
+                ['id' => '1234', 'name' => 'john']
+            ],
             'optional path with omitted optional' => [
+                [['GET'], '/hello/{id:\d+}[/{name}]'],
+                ['GET', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'fallback routes (when nothing matches) for optional path with omitted optional' => [
+                [['*'], '/hello/{id:\d+}[/{name}]'],
+                ['GET', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'HEAD falls back on GET for optional path with omitted optional' => [
                 [['GET'], '/hello/{id:\d+}[/{name}]'],
                 ['GET', '/hello/1234'],
                 ['id' => '1234']
@@ -342,9 +398,27 @@ class RouteCollectionTest extends TestCase
                 [['GET'], '/hello[/{id:\d+}[/{name}]]'],
                 ['GET', '/hello']
             ],
+            'fallback routes (when nothing matches) for nested optional path with 2-level omitted optional' => [
+                [['*'], '/hello[/{id:\d+}[/{name}]]'],
+                ['GET', '/hello']
+            ],
+            'HEAD fallsback on GET for nested optional path with 2-level omitted optional' => [
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
+                ['HEAD', '/hello']
+            ],
             'nested optional path with 1-level omitted optional' => [
                 [['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'], '/hello[/{id:\d+}[/{name}]]'],
                 ['PUT', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'fallback routes (when nothing matches) for nested optional path with 1-level omitted optional' => [
+                [['*'], '/hello[/{id:\d+}[/{name}]]'],
+                ['PUT', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'HEAD fallsback on GET for nested optional path with 1-level omitted optional' => [
+                [['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'], '/hello[/{id:\d+}[/{name}]]'],
+                ['HEAD', '/hello/1234'],
                 ['id' => '1234']
             ],
             'nested optional path with no omitted optional' => [
@@ -352,13 +426,16 @@ class RouteCollectionTest extends TestCase
                 ['GET', '/hello/1234/john'],
                 ['id' => '1234', 'name' => 'john']
             ],
-            /*
-
-            */
-            /*'route with numeric-only variable with invalid requested path' => [
-                [['GET', 'POST'], '/hello/{id:\d+}'],
-                ['GET', '/hello/abcd']
-            ],*/
+            'fallback routes (when nothing matches) for nested optional path with no omitted optional' => [
+                [['*'], '/hello[/{id:\d+}[/{name}]]'],
+                ['GET', '/hello/1234/john'],
+                ['id' => '1234', 'name' => 'john']
+            ],
+            'HEAD fallsback on GET for nested optional path with no omitted optional' => [
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
+                ['HEAD', '/hello/1234/john'],
+                ['id' => '1234', 'name' => 'john']
+            ],
         ];
     }
 
@@ -384,7 +461,7 @@ class RouteCollectionTest extends TestCase
         $this->assertSame($expectedVars, $vars);
     }
 
-    public function invalidRouteDataProvider(): array
+    public function invalidRoutePathProvider(): array
     {
         return [
             'invalid requested path for 2-level deep route' => [
@@ -399,12 +476,12 @@ class RouteCollectionTest extends TestCase
     }
 
     /**
-     * @dataProvider invalidRouteDataProvider
+     * @dataProvider invalidRoutePathProvider
      *
      * @param array $storedRoute
      * @param array $requestedRoute
      */
-    public function testGetRouteDataShouldThrowExceptionForInvalidRoutes(
+    public function testGetRouteDataDoesThrowRouteNotFoundException(
         array $storedRoute,
         array $requestedRoute
     ): void {
@@ -413,6 +490,47 @@ class RouteCollectionTest extends TestCase
         $this->routeCollection->add(...$storedRoute);
 
         $this->expectException(RouteNotFoundException::class);
+
+        $this->routeCollection->getRouteData(...$requestedRoute);
+    }
+
+    public function invalidRouteMethodProvider(): array
+    {
+        return [
+            'access via non-allowed method for static route' => [
+                [['GET'], '/hello/world'],
+                ['POST', '/hello/world'],
+            ],
+            'access via non-allowed method for variable route' => [
+                [['GET'], '/hello/{name}'],
+                ['POST', '/hello/john'],
+            ],
+            'access via non-allowed method for static route with multi-methods' => [
+                [['GET', 'DELETE', 'PATCH', 'OPTIONS'], '/hello/world'],
+                ['POST', '/hello/world'],
+            ],
+            'access via non-allowed method for variable route with multi-methods' => [
+                [['GET', 'DELETE', 'PATCH', 'OPTIONS'], '/hello/{name}'],
+                ['POST', '/hello/john'],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidRouteMethodProvider
+     *
+     * @param array $storedRoute
+     * @param array $requestedRoute
+     */
+    public function testGetRouteDataDoesThrowMethodNotAllowedException(
+        array $storedRoute,
+        array $requestedRoute
+    ): void {
+        $storedHandler = static fn ($request, $handler) => $handler->handle($request);
+        $storedRoute[] = $storedHandler;
+        $this->routeCollection->add(...$storedRoute);
+
+        $this->expectException(MethodNotAllowedException::class);
 
         $this->routeCollection->getRouteData(...$requestedRoute);
     }
