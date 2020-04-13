@@ -606,6 +606,8 @@ class RouteCollectionTest extends TestCase
         return [
             'empty path' => ['/', '/'],
             'simple static path' => ['/foo/bar', '/foo/bar'],
+            'variable route' => ['/foo/{bar}', '/foo/{bar}'],
+            'optional route' => ['/foo/[bar]', '/foo/[bar]'],
             'route with numeric-only variable' => ['/hello/{id:\d+}', '/hello/1234'],
             '2-level deep route with variable' => ['/hello/{name}', '/hello/john'],
             'n-level deep route with variable' => ['/hello/{name:.+}', '/hello/john/jane/doe'],
