@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2019 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2020 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -92,18 +92,17 @@ REGEX;
      */
     public function parsePath(string $route): array
     {
-        $routeWithoutClosingOptionals = rtrim($route, ']');
-        $numOptionals = strlen($route) - strlen($routeWithoutClosingOptionals);
+        $noClosingOptionals = rtrim($route, ']');
+        $numOptionals = strlen($route) - strlen($noClosingOptionals);
 
         // split on `[` while skipping placeholders
-        $segments = preg_split(
-            '~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \[~x', $routeWithoutClosingOptionals
-        );
+        $pattern = '~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \[~x';
+        $segments = preg_split($pattern, $noClosingOptionals);
 
         if ($numOptionals !== count($segments) - 1) {
             // if there are any `]` in the middle of the route, throw a more specific error message
             if (
-                preg_match('~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \]~x', $routeWithoutClosingOptionals)
+                preg_match('~' . self::PLACEHOLDER_REGEX . '(*SKIP)(*F) | \]~x', $noClosingOptionals)
             ) {
                 throw new BadRouteException(
                     'Optional segments (i.e. parts enclosed within `[]`) can only occur at the end of a route'
@@ -133,9 +132,9 @@ REGEX;
     /**
      * @param string $method
      * @param string $uri
-     * 
+     *
      * @return array
-     * 
+     *
      * @throws MethodNotAllowedException
      * @throws RouteNotFoundException
      */
@@ -178,10 +177,10 @@ REGEX;
 
     /**
      * @param string $uri
-     * 
+     *
      * @return array
      */
-    public function getAllowedMethods(string $uri): array 
+    public function getAllowedMethods(string $uri): array
     {
         if (isset($this->allowedMethods[$uri])) {
             return $this->allowedMethods[$uri];
@@ -205,7 +204,7 @@ REGEX;
      * @param string $method
      * @param string $path
      * @param mixed $handler
-     * 
+     *
      * @throws BadRouteException
      */
     private function addStaticRoute(string $method, string $path, $handler): void
@@ -213,7 +212,8 @@ REGEX;
         if (isset($this->staticRoutes[$method][$path])) {
             throw new BadRouteException(sprintf(
                 'Cannot register two routes matching "%s" for method "%s"',
-                $path, $method
+                $path,
+                $method
             ));
         }
 
@@ -222,7 +222,9 @@ REGEX;
                 if (preg_match('~^' . $route['regex'] . '$~', $path)) {
                     throw new BadRouteException(sprintf(
                         'Static route "%s" is shadowed by previously defined variable route "%s" for method "%s"',
-                        $path, $route['regex'], $method
+                        $path,
+                        $route['regex'],
+                        $method
                     ));
                 }
             }
@@ -242,7 +244,7 @@ REGEX;
      * @param string $method
      * @param array $pathData
      * @param mixed $handler
-     * 
+     *
      * @throws BadRouteException
      */
     private function addVariableRoute(string $method, array $pathData, $handler): void
@@ -252,7 +254,8 @@ REGEX;
         if (isset($this->variableRoutes[$method][$regex])) {
             throw new BadRouteException(sprintf(
                 'Cannot register two routes matching "%s" for method "%s"',
-                $regex, $method
+                $regex,
+                $method
             ));
         }
 
@@ -266,7 +269,7 @@ REGEX;
 
     /**
      * @param string $regex
-     * 
+     *
      * @return bool
      */
     private static function regexHasCapturingGroups(string $regex): bool
@@ -287,15 +290,15 @@ REGEX;
                     | \*
                     )
                 ~x',
-            $regex
-        );
+                $regex
+            );
     }
 
     /**
      * @param array $routeData
-     * 
+     *
      * @return array
-     * 
+     *
      * @throws BadRouteException
      */
     private static function buildRegexForRoute(array $routeData): array
@@ -313,14 +316,16 @@ REGEX;
 
             if (isset($vars[$varName])) {
                 throw new BadRouteException(sprintf(
-                    'Cannot use the same placeholder "%s" twice', $varName
+                    'Cannot use the same placeholder "%s" twice',
+                    $varName
                 ));
             }
 
             if (self::regexHasCapturingGroups($regexPart)) {
                 throw new BadRouteException(sprintf(
                     'Regex "%s" for parameter "%s" contains a capturing group',
-                    $regexPart, $varName
+                    $regexPart,
+                    $varName
                 ));
             }
 
@@ -335,15 +340,14 @@ REGEX;
      * Parse a route string that does not contain optional segments.
      *
      * @param string $routePattern A route pattern with no optional segments.
-     * 
+     *
      * @return array
      */
     private static function parseRouteTokens(string $routePattern): array
     {
+        $pattern = '~' . self::PLACEHOLDER_REGEX . '~x';
         // check if any placeholders (i.e. `{}`) exist
-        if (! preg_match_all(
-            '~' . self::PLACEHOLDER_REGEX . '~x', $routePattern, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER
-        )) {
+        if (! preg_match_all($pattern, $routePattern, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
             return [$routePattern];
         }
 
@@ -377,7 +381,7 @@ REGEX;
 
     /**
      * @param array $routeMap
-     * 
+     *
      * @return array
      */
     private static function processRouteChunks(array $routeMap): array
@@ -434,7 +438,7 @@ REGEX;
      * @param array $routeData
      * @param string $method
      * @param string $uri
-     * 
+     *
      * @return array
      */
     private static function getVariableRouteData(
