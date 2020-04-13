@@ -19,6 +19,7 @@ use BitFrame\FastRoute\Exception\{
 };
 
 use function strlen;
+use function strpos;
 use function rtrim;
 use function is_string;
 use function substr;
@@ -33,6 +34,7 @@ use function max;
 use function sprintf;
 use function str_repeat;
 use function preg_split;
+use function preg_quote;
 use function preg_match;
 use function preg_match_all;
 
@@ -270,7 +272,7 @@ REGEX;
     private static function regexHasCapturingGroups(string $regex): bool
     {
         // needs to have at least a ( to contain a capturing group
-        return \strpos($regex, '(') !== false 
+        return strpos($regex, '(') !== false
             // semi-accurate detection for capturing groups
             && (bool) preg_match(
                 '~
@@ -303,7 +305,7 @@ REGEX;
 
         foreach ($routeData as $pathSegment) {
             if (is_string($pathSegment)) {
-                $regex .= \preg_quote($pathSegment, '~');
+                $regex .= preg_quote($pathSegment, '~');
                 continue;
             }
 
@@ -435,8 +437,11 @@ REGEX;
      * 
      * @return array
      */
-    private static function getVariableRouteData(array $routeData, string $method, string $uri): array
-    {
+    private static function getVariableRouteData(
+        array $routeData,
+        string $method,
+        string $uri
+    ): array {
         $generatedRouteData = self::generateVariableRouteData($routeData, $method);
 
         if (isset($generatedRouteData[$method])) {

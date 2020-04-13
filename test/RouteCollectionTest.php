@@ -319,6 +319,24 @@ class RouteCollectionTest extends TestCase
                 ['GET', '/hello/1234'],
                 ['id' => '1234']
             ],
+            'route with non-capturing group' => [
+                [['GET'], '/foobar/{lang:(?:en|de)}'],
+                ['GET', '/foobar/de'],
+                ['lang' => 'de']
+            ],
+            'route with specific options' => [
+                [['GET'], '/foobar/{lang:en|de}'],
+                ['GET', '/foobar/de'],
+                ['lang' => 'de']
+            ],
+            'route with partial optional #1' => [
+                [['GET'], '/hello/foo[bar]'],
+                ['GET', '/hello/foo']
+            ],
+            'route with partial optional #2' => [
+                [['GET'], '/hello/foo[bar]'],
+                ['GET', '/hello/foobar']
+            ],
             'HEAD request' => [
                 [['HEAD'], '/hello/{id:\d+}'],
                 ['HEAD', '/hello/1234'],
@@ -464,6 +482,42 @@ class RouteCollectionTest extends TestCase
     public function invalidRoutePathProvider(): array
     {
         return [
+            'static path with differing trailing slashes' => [
+                [['GET'], '/hello/world'],
+                ['HEAD', '/hello/world/']
+            ],
+            'static path with differing leading slashes' => [
+                [['GET'], '/hello/world'],
+                ['GET', 'hello/world/']
+            ],
+            'static path with mismatching case path #1' => [
+                [['GET'], '/hello/world'],
+                ['GET', '/hello/WoRlD']
+            ],
+            'static path with mismatching case path #2' => [
+                [['GET'], '/hello/WoRlD'],
+                ['GET', '/hello/world']
+            ],
+            'route with non-capturing group when nothing matches' => [
+                [['GET'], '/foobar/{lang:(?:en|de)}'],
+                ['GET', '/foobar/fr']
+            ],
+            'route with specific options' => [
+                [['GET'], '/foobar/{lang:en|de}'],
+                ['GET', '/foobar/fr']
+            ],
+            'route with partial optional #1' => [
+                [['GET'], '/hello/foo[bar]'],
+                ['GET', '/hello/foobaz']
+            ],
+            'route with partial optional #2' => [
+                [['GET'], '/hello/foo[bar]'],
+                ['GET', '/hello/bar']
+            ],
+            'route with partial optional #3' => [
+                [['GET'], '/hello/foo[bar]'],
+                ['GET', '/hello/fooba']
+            ],
             'invalid requested path for 2-level deep route' => [
                 [['GET'], '/hello/{name}'],
                 ['GET', '/hello/john/doe'],
@@ -471,6 +525,18 @@ class RouteCollectionTest extends TestCase
             'route with numeric-only variable with invalid requested path' => [
                 [['GET', 'POST'], '/hello/{id:\d+}'],
                 ['GET', '/hello/abcd']
+            ],
+            '2-level deep route with variable and trailing slash' => [
+                [['GET', 'POST'], '/hello/{name}'],
+                ['POST', '/hello/john/']
+            ],
+            'route with numeric-only variable and trailing slash' => [
+                [['GET'], '/hello/{id:\d+}/'],
+                ['GET', '/hello/1234']
+            ],
+            'nested optional path with 2-level omitted optional without slashes' => [
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
+                ['GET', 'hello']
             ],
         ];
     }
@@ -533,5 +599,64 @@ class RouteCollectionTest extends TestCase
         $this->expectException(MethodNotAllowedException::class);
 
         $this->routeCollection->getRouteData(...$requestedRoute);
+    }
+
+    public function duplicatePathProvider(): array
+    {
+        return [
+            'empty path' => ['/', '/'],
+            'simple static path' => ['/foo/bar', '/foo/bar'],
+            'route with numeric-only variable' => ['/hello/{id:\d+}', '/hello/1234'],
+            '2-level deep route with variable' => ['/hello/{name}', '/hello/john'],
+            'n-level deep route with variable' => ['/hello/{name:.+}', '/hello/john/jane/doe'],
+            'n-level deep optional route with one optional path provided' => ['/hello/{name:.+}', '/hello/doe'],
+            'optional path with omitted optional' => ['/hello/{id:\d+}[/{name}]', '/hello/1234'],
+            'nested optional path with 2-level omitted optional' => ['/hello[/{id:\d+}[/{name}]]', '/hello'],
+            'nested optional path with 1-level omitted optional' => ['/hello[/{id:\d+}[/{name}]]', '/hello/1234'],
+            'nested optional path with no omitted optional' => ['/hello[/{id:\d+}[/{name}]]', '/hello/1234/john'],
+        ];
+    }
+
+    /**
+     * @dataProvider duplicatePathProvider
+     *
+     * @param string $storedPath
+     * @param string $requestedPath
+     */
+    public function testShouldThrowExceptionWhenUsingVariableTwice(
+        string $storedPath,
+        string $requestedPath
+    ): void {
+        $handler = static fn ($request, $handler) => ($handler->handle($request));
+        $this->routeCollection->add(['GET'], $storedPath, $handler);
+
+        $this->expectException(BadRouteException::class);
+
+        $this->routeCollection->add(['GET'], $requestedPath, $handler);
+    }
+
+    public function capturingGroupRouteProvider(): array
+    {
+        return [
+            'placeholder with optionals and capturing group' => [
+                '/foobar/{lang:(en|de)}'
+            ],
+            'placeholder with nested optional and capturing group' => [
+                '/hello[/{id:(\d+)}[/{name}]]'
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider capturingGroupRouteProvider
+     *
+     * @param string $path
+     */
+    public function testShouldThrowExceptionWhenPathPlaceholderHasCapturingGroup(
+        string $path
+    ): void {
+        $this->expectException(BadRouteException::class);
+        $handler = static fn ($request, $handler) => ($handler->handle($request));
+        $this->routeCollection->add(['GET'], $path, $handler);
     }
 }
