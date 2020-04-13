@@ -13,9 +13,11 @@ declare(strict_types=1);
 namespace BitFrame\FastRoute\Test;
 
 use PHPUnit\Framework\TestCase;
-use BitFrame\Router\RouterInterface;
 use BitFrame\FastRoute\RouteCollection;
-use BitFrame\FastRoute\Exception\BadRouteException;
+use BitFrame\FastRoute\Exception\{
+    RouteNotFoundException,
+    BadRouteException
+};
 
 /**
  * @covers \BitFrame\FastRoute\RouteCollection
@@ -195,40 +197,86 @@ class RouteCollectionTest extends TestCase
     public function allowedMethodsProvider(): array
     {
         return [
-            'GET' => [['GET'], '/hello/world', '/hello/world'],
-            'POST' => [['POST'], '/hello/world', '/hello/world'],
-            'PUT' => [['PUT'], '/hello/world', '/hello/world'],
-            'PATCH' => [['PATCH'], '/hello/world', '/hello/world'],
-            'DELETE' => [['DELETE'], '/hello/world', '/hello/world'],
-            'HEAD' => [['HEAD'], '/hello/world', '/hello/world'],
-            'OPTIONS' => [['OPTIONS'], '/hello/world', '/hello/world'],
-            'any' => [
-                ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-                '/hello/world',
+            'GET' => [
+                [['GET'], '/hello/world'],
                 '/hello/world'
             ],
-            'non-standard method' => [['test'], '/hello/world', '/hello/world'],
-            'route with variable' => [['GET', 'POST'], '/hello/{id:\d+}', '/hello/1234'],
-            'route with variable and non-standard method' => [['test'], '/hello/{id:\d+}', '/hello/1234'],
-            'non-matching route with variable' => [['GET'], '/hello/{id:\d+}', '/hello/world', []],
-            '2-level deep route with variable' => [['GET'], '/hello/{name}', '/hello/john'],
-            'invalid requested path for 2-level deep route' => [['GET'], '/hello/{name}', '/hello/john/doe', []],
-            'n-level deep route with variable' => [['GET'], '/hello/{name:.+}', '/hello/john/jane/doe'],
-            'optional path requested with optional' => [['GET'], '/hello/{id:\d+}[/{name}]', '/hello/1234/john'],
-            'optional path with omitted optional' => [['GET'], '/hello/{id:\d+}[/{name}]', '/hello/1234'],
+            'POST' => [
+                [['POST'], '/hello/world'],
+                '/hello/world'
+            ],
+            'PUT' => [
+                [['PUT'], '/hello/world'],
+                '/hello/world'
+            ],
+            'PATCH' => [
+                [['PATCH'], '/hello/world'],
+                '/hello/world'
+            ],
+            'DELETE' => [
+                [['DELETE'], '/hello/world'],
+                '/hello/world'
+            ],
+            'HEAD' => [
+                [['HEAD'], '/hello/world'],
+                '/hello/world'
+            ],
+            'OPTIONS' => [
+                [['OPTIONS'], '/hello/world'],
+                '/hello/world'
+            ],
+            'any' => [
+                [['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], '/hello/world'],
+                '/hello/world'
+            ],
+            'non-standard method' => [
+                [['test'], '/hello/world'],
+                '/hello/world'
+            ],
+            'route with numeric-only variable' => [
+                [['GET', 'POST'], '/hello/{id:\d+}'],
+                '/hello/1234'
+            ],
+            'route with variable and non-standard method' => [
+                [['test'], '/hello/{id:\d+}'],
+                '/hello/1234'
+            ],
+            'non-matching route with variable' => [
+                [['GET'], '/hello/{id:\d+}'],
+                '/hello/world',
+                []
+            ],
+            '2-level deep route with variable' => [
+                [['GET'], '/hello/{name}'],
+                '/hello/john'
+            ],
+            'invalid requested path for 2-level deep route' => [
+                [['GET'], '/hello/{name}'],
+                '/hello/john/doe',
+                []
+            ],
+            'n-level deep route with variable' => [
+                [['GET'], '/hello/{name:.+}'],
+                '/hello/john/jane/doe'
+            ],
+            'optional path requested with optional provided' => [
+                [['GET'], '/hello/{id:\d+}[/{name}]'],
+                '/hello/1234/john'
+            ],
+            'optional path with omitted optional' => [
+                [['GET'], '/hello/{id:\d+}[/{name}]'],
+                '/hello/1234'
+            ],
             'nested optional path with 2-level omitted optional' => [
-                ['GET'],
-                '/hello[/{id:\d+}[/{name}]]',
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
                 '/hello'
             ],
             'nested optional path with 1-level omitted optional' => [
-                ['GET'],
-                '/hello[/{id:\d+}[/{name}]]',
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
                 '/hello/1234'
             ],
             'nested optional path with no omitted optional' => [
-                ['GET'],
-                '/hello[/{id:\d+}[/{name}]]',
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
                 '/hello/1234/john'
             ],
         ];
@@ -237,24 +285,135 @@ class RouteCollectionTest extends TestCase
     /**
      * @dataProvider allowedMethodsProvider
      *
-     * @param array $methods
-     * @param string $path
+     * @param array $storedRoute
      * @param string $requestedPath
      * @param array|null $expectedMethods
      */
     public function testGetAllowedMethods(
-        array $methods,
-        string $path,
+        array $storedRoute,
         string $requestedPath,
         ?array $expectedMethods = null
     ): void {
-        $handler = static fn ($request, $handler) => $handler->handle($request);
-        $this->routeCollection->add($methods, $path, $handler);
+        $storedRoute[] = static fn ($request, $handler) => $handler->handle($request);
+        $this->routeCollection->add(...$storedRoute);
 
         $allowedMethods = $this->routeCollection->getAllowedMethods($requestedPath);
 
-        //echo print_r($allowedMethods, true);
+        $this->assertSame($expectedMethods ?? $storedRoute[0], $allowedMethods);
+    }
 
-        $this->assertSame($expectedMethods ?? $methods, $allowedMethods);
+    public function routeDataProvider(): array
+    {
+        return [
+            'static path with single method' => [
+                [['GET'], '/hello/world'],
+                ['GET', '/hello/world']
+            ],
+            'static path with multiple methods' => [
+                [['GET', 'POST'], '/hello/world'],
+                ['GET', '/hello/world']
+            ],
+            'route with numeric-only variable' => [
+                [['GET', 'POST'], '/hello/{id:\d+}'],
+                ['GET', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            '2-level deep route with variable' => [
+                [['PUT'], '/hello/{name}'],
+                ['PUT', '/hello/john'],
+                ['name' => 'john']
+            ],
+            'n-level deep route with variable' => [
+                [['GET', 'POST'], '/hello/{name:.+}'],
+                ['POST', '/hello/john/jane/doe'],
+                ['name' => 'john/jane/doe']
+            ],
+            'optional path requested with optional provided' => [
+                [['DELETE'], '/hello/{id:\d+}[/{name}]'],
+                ['DELETE', '/hello/1234/john'],
+                ['id' => '1234', 'name' => 'john']
+            ],
+            'optional path with omitted optional' => [
+                [['GET'], '/hello/{id:\d+}[/{name}]'],
+                ['GET', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'nested optional path with 2-level omitted optional' => [
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
+                ['GET', '/hello']
+            ],
+            'nested optional path with 1-level omitted optional' => [
+                [['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'], '/hello[/{id:\d+}[/{name}]]'],
+                ['PUT', '/hello/1234'],
+                ['id' => '1234']
+            ],
+            'nested optional path with no omitted optional' => [
+                [['GET'], '/hello[/{id:\d+}[/{name}]]'],
+                ['GET', '/hello/1234/john'],
+                ['id' => '1234', 'name' => 'john']
+            ],
+            /*
+
+            */
+            /*'route with numeric-only variable with invalid requested path' => [
+                [['GET', 'POST'], '/hello/{id:\d+}'],
+                ['GET', '/hello/abcd']
+            ],*/
+        ];
+    }
+
+    /**
+     * @dataProvider routeDataProvider
+     *
+     * @param array $storedRoute
+     * @param array $requestedRoute
+     * @param array $expectedVars
+     */
+    public function testGetRouteData(
+        array $storedRoute,
+        array $requestedRoute,
+        array $expectedVars = []
+    ): void {
+        $storedHandler = static fn ($request, $handler) => $handler->handle($request);
+        $storedRoute[] = $storedHandler;
+        $this->routeCollection->add(...$storedRoute);
+
+        [$handler, $vars] = $this->routeCollection->getRouteData(...$requestedRoute);
+
+        $this->assertSame($storedHandler, $handler);
+        $this->assertSame($expectedVars, $vars);
+    }
+
+    public function invalidRouteDataProvider(): array
+    {
+        return [
+            'invalid requested path for 2-level deep route' => [
+                [['GET'], '/hello/{name}'],
+                ['GET', '/hello/john/doe'],
+            ],
+            'route with numeric-only variable with invalid requested path' => [
+                [['GET', 'POST'], '/hello/{id:\d+}'],
+                ['GET', '/hello/abcd']
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidRouteDataProvider
+     *
+     * @param array $storedRoute
+     * @param array $requestedRoute
+     */
+    public function testGetRouteDataShouldThrowExceptionForInvalidRoutes(
+        array $storedRoute,
+        array $requestedRoute
+    ): void {
+        $storedHandler = static fn ($request, $handler) => $handler->handle($request);
+        $storedRoute[] = $storedHandler;
+        $this->routeCollection->add(...$storedRoute);
+
+        $this->expectException(RouteNotFoundException::class);
+
+        $this->routeCollection->getRouteData(...$requestedRoute);
     }
 }
