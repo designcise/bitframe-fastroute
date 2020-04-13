@@ -629,7 +629,7 @@ class RouteCollectionTest extends TestCase
         string $storedPath,
         string $requestedPath
     ): void {
-        $handler = static fn ($request, $handler) => ($handler->handle($request));
+        $handler = static fn ($request, $handler) => $handler->handle($request);
         $this->routeCollection->add(['GET'], $storedPath, $handler);
 
         $this->expectException(BadRouteException::class);
@@ -658,7 +658,18 @@ class RouteCollectionTest extends TestCase
         string $path
     ): void {
         $this->expectException(BadRouteException::class);
-        $handler = static fn ($request, $handler) => ($handler->handle($request));
+        $handler = static fn ($request, $handler) => $handler->handle($request);
         $this->routeCollection->add(['GET'], $path, $handler);
+    }
+
+    public function testShouldThrowExceptionWhenSamePlaceholderUsedTwice(): void
+    {
+        $this->expectException(BadRouteException::class);
+        $handler = static fn ($request, $handler) => $handler->handle($request);
+        $this->routeCollection->add(
+            ['GET'],
+            '/{foo:\w+}|/{lang:en|de}/{foo:\w+}',
+            $handler
+        );
     }
 }
