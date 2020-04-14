@@ -518,6 +518,18 @@ class RouteCollectionTest extends TestCase
                 [['GET'], '/hello/foo[bar]'],
                 ['GET', '/hello/fooba']
             ],
+            'route with partial optional #4' => [
+                [['GET'], '/foo[/bar]'],
+                ['GET', '/foo/']
+            ],
+            'route with partial optional #5' => [
+                [['GET'], '/foo/[bar]'],
+                ['GET', '/foo']
+            ],
+            'route with partial optional #6' => [
+                [['GET'], '/foo/[bar]'],
+                ['GET', '/foo/bar/']
+            ],
             'invalid requested path for 2-level deep route' => [
                 [['GET'], '/hello/{name}'],
                 ['GET', '/hello/john/doe'],
