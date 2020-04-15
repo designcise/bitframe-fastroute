@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use BitFrame\Router\AbstractRouter;
 use BitFrame\FastRoute\Router;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface, UriInterface};
 use BitFrame\FastRoute\Exception\{
@@ -581,59 +580,6 @@ class RouterTest extends TestCase
         $storedRoute[] = static fn ($request, $handler) => $handler->handle($request);
 
         $this->router->map(...$storedRoute);
-
-        $result = $this->router->process($request->reveal(), $handler->reveal());
-
-        $this->assertSame($response->reveal(), $result);
-    }
-
-    public function processControllerProvider(): array
-    {
-        return [
-            'controller class name' => [
-                DummyController::class
-            ],
-            'controller class name with action method' => [
-                DummyController::class . '::testAction'
-            ],
-            'callable controller object' => [
-                [new DummyController(), 'testAction']
-            ],
-            'anonymous function' => [
-                static fn ($request, $handler) => $handler->handle($request)
-            ],
-            'anonymous class' => [
-                new class implements MiddlewareInterface {
-                    public function process(
-                        ServerRequestInterface $request,
-                        RequestHandlerInterface $handler
-                    ): ResponseInterface {
-                        return $handler->handle($request);
-                    }
-                }
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider processControllerProvider
-     *
-     * @param mixed $controller
-     */
-    public function testProcessHandler($controller): void {
-        $response = $this->prophesize(ResponseInterface::class);
-
-        $uri = $this->prophesize(UriInterface::class);
-        $uri->getPath()->willReturn('/foo/test');
-
-        $request = $this->prophesize(ServerRequestInterface::class);
-        $request->getMethod()->willReturn('GET');
-        $request->getUri()->willReturn($uri);
-
-        $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())->will([$response, 'reveal']);
-
-        $this->router->get('/foo/test', $controller);
 
         $result = $this->router->process($request->reveal(), $handler->reveal());
 

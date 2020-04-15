@@ -55,10 +55,6 @@ class Router extends AbstractRouter implements MiddlewareInterface
             $request = $request->withAttribute($name, $value);
         }
 
-        if ($this->isClassName($route[0])) {
-            $route[0] = $this->addControllerActionFromPath($route[0], $path);
-        }
-
         $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
         return $routeAsMiddleware->process($request, $handler);
     }
@@ -69,17 +65,5 @@ class Router extends AbstractRouter implements MiddlewareInterface
     public function getRouteCollection(): RouteCollection
     {
         return $this->routeCollection;
-    }
-
-    /**
-     * @param mixed $routeHandler
-     *
-     * @return boolean
-     */
-    protected function isClassName($routeHandler): bool
-    {
-        return is_string($routeHandler)
-            && strpos($routeHandler, '::') === false
-            && class_exists($routeHandler);
     }
 }
