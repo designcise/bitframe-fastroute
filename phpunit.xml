@@ -9,7 +9,7 @@
          processIsolation="false"
     >
     <testsuites>
-        <testsuite name="unit">
+        <testsuite name="bitframe_fastroute">
             <directory suffix="Test.php">./test</directory>
         </testsuite>
     </testsuites>
