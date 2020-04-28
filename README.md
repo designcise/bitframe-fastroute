@@ -42,7 +42,14 @@ $app->run([
 
 ## Tests
 
-To execute the test suite, you will need [PHPUnit](https://phpunit.de/).
+To run the tests you can use the following commands:
+
+| Command          | Type            |
+| ---------------- |:---------------:|
+| `composer test`  | PHPUnit tests   |
+| `composer style` | CodeSniffer     |
+| `composer md`    | MessDetector    |
+| `composer check` | PHPStan         |
 
 ## Contributing
 

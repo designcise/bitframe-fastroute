@@ -69,7 +69,7 @@ REGEX;
      * @param string $routePath
      * @param mixed $handler
      */
-    public function add(array $methods, string $routePath, $handler)
+    public function add(array $methods, string $routePath, $handler): void
     {
         $routePathTokens = $this->parsePath($routePath);
 
@@ -77,9 +77,10 @@ REGEX;
             foreach ($routePathTokens as $path) {
                 if (count($path) === 1 && is_string($path[0])) {
                     $this->addStaticRoute($method, $path[0], $handler);
-                } else {
-                    $this->addVariableRoute($method, $path, $handler);
+                    continue;
                 }
+
+                $this->addVariableRoute($method, $path, $handler);
             }
         }
     }
@@ -88,6 +89,7 @@ REGEX;
      * Parses a route path string into multiple route token arrays.
      *
      * @param string $route Route string to parse
+     *
      * @return mixed[][] Array of route data arrays
      */
     public function parsePath(string $route): array
@@ -117,9 +119,7 @@ REGEX;
 
         foreach ($segments as $key => $segment) {
             if ($segment === '' && $key !== 0) {
-                throw new BadRouteException(
-                    'Optional segments (i.e. parts enclosed within `[]`) cannot be empty'
-                );
+                throw new BadRouteException('Optional segments (i.e. parts enclosed within `[]`) cannot be empty');
             }
 
             $currentRoute .= $segment;
@@ -144,11 +144,9 @@ REGEX;
             return [$this->staticRoutes[$method][$uri], []];
         }
 
-        if (isset($this->variableRoutes[$method])) {
-            $result = self::getVariableRouteData($this->variableRoutes[$method], $method, $uri);
-            if (! empty($result)) {
-                return $result;
-            }
+        $routeData = self::getVariableRouteData($this->variableRoutes[$method] ?? [], $method, $uri);
+        if (! empty($routeData)) {
+            return $routeData;
         }
 
         // for `HEAD` requests, attempt fallback to `GET`
@@ -161,11 +159,9 @@ REGEX;
             return [$this->staticRoutes['*'][$uri], []];
         }
 
-        if (isset($this->variableRoutes['*'])) {
-            $result = self::getVariableRouteData($this->variableRoutes['*'], '*', $uri);
-            if (! empty($result)) {
-                return $result;
-            }
+        $routeData = self::getVariableRouteData($this->variableRoutes['*'] ?? [], '*', $uri);
+        if (! empty($routeData)) {
+            return $routeData;
         }
 
         if (count($this->getAllowedMethods($uri))) {
@@ -175,11 +171,6 @@ REGEX;
         throw new RouteNotFoundException($uri);
     }
 
-    /**
-     * @param string $uri
-     *
-     * @return array
-     */
     public function getAllowedMethods(string $uri): array
     {
         if (isset($this->allowedMethods[$uri])) {
@@ -217,25 +208,21 @@ REGEX;
             ));
         }
 
-        if (isset($this->variableRoutes[$method])) {
-            foreach ($this->variableRoutes[$method] as $route) {
-                if (preg_match('~^' . $route['regex'] . '$~', $path)) {
-                    throw new BadRouteException(sprintf(
-                        'Static route "%s" is shadowed by previously defined variable route "%s" for method "%s"',
-                        $path,
-                        $route['regex'],
-                        $method
-                    ));
-                }
+        $variableRoutes = $this->variableRoutes[$method] ?? [];
+
+        foreach ($variableRoutes as $route) {
+            if (preg_match('~^' . $route['regex'] . '$~', $path)) {
+                throw new BadRouteException(sprintf(
+                    'Static route "%s" is shadowed by previously defined variable route "%s" for method "%s"',
+                    $path,
+                    $route['regex'],
+                    $method
+                ));
             }
         }
 
         $this->staticRoutes[$method][$path] = $handler;
-
-        if (! isset($this->allowedMethods[$path])) {
-            $this->allowedMethods[$path] = [];
-        }
-        $this->allowedMethods[$path][] = $method;
+        $this->allowedMethods[$path] = [...$this->allowedMethods[$path] ?? [], $method];
     }
 
     /**
@@ -267,11 +254,6 @@ REGEX;
         ];
     }
 
-    /**
-     * @param string $regex
-     *
-     * @return bool
-     */
     private static function regexHasCapturingGroups(string $regex): bool
     {
         // needs to have at least a ( to contain a capturing group
@@ -379,11 +361,6 @@ REGEX;
         return $routeTokens;
     }
 
-    /**
-     * @param array $routeMap
-     *
-     * @return array
-     */
     private static function processRouteChunks(array $routeMap): array
     {
         $routeMapCollection = [];
@@ -409,62 +386,48 @@ REGEX;
         ];
     }
 
-    /**
-     * @param array $routeData
-     * @param string $method
-     *
-     * @return array
-     */
     private static function generateVariableRouteData(
         array $routeData,
         string $method
     ): array {
-        $data = [];
-
-        if (! empty($routeData)) {
-            $approxChunkSize = 10;
-            $count = count($routeData);
-            $numParts = max(1, round($count / $approxChunkSize));
-            $chunkSize = (int) ceil($count / $numParts);
-            $chunks = array_chunk($routeData, $chunkSize, true);
-
-            $data[$method] = array_map('self::processRouteChunks', $chunks);
+        if (empty($routeData)) {
+            return [];
         }
+
+        $approxChunkSize = 10;
+        $count = count($routeData);
+        $numParts = max(1, round($count / $approxChunkSize));
+        $chunkSize = (int) ceil($count / $numParts);
+        $chunks = array_chunk($routeData, $chunkSize, true);
+
+        $data[$method] = array_map('self::processRouteChunks', $chunks);
 
         return $data;
     }
 
-    /**
-     * @param array $routeData
-     * @param string $method
-     * @param string $uri
-     *
-     * @return array
-     */
     private static function getVariableRouteData(
         array $routeData,
         string $method,
         string $uri
     ): array {
         $generatedRouteData = self::generateVariableRouteData($routeData, $method);
+        $routeMethodData = $generatedRouteData[$method] ?? [];
 
-        if (isset($generatedRouteData[$method])) {
-            foreach ($generatedRouteData[$method] as $data) {
-                if (! preg_match($data['regex'], $uri, $matches)) {
-                    continue;
-                }
-
-                $routeMap = $data['routeMap'][count($matches)];
-
-                $vars = [];
-                $i = 0;
-
-                foreach ($routeMap['vars'] as $varName) {
-                    $vars[$varName] = $matches[++$i];
-                }
-                
-                return [$routeMap['handler'], $vars];
+        foreach ($routeMethodData as $data) {
+            if (! preg_match($data['regex'], $uri, $matches)) {
+                continue;
             }
+
+            $routeMap = $data['routeMap'][count($matches)];
+
+            $vars = [];
+            $i = 0;
+
+            foreach ($routeMap['vars'] as $varName) {
+                $vars[$varName] = $matches[++$i];
+            }
+
+            return [$routeMap['handler'], $vars];
         }
 
         return [];
