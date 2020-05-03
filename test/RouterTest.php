@@ -15,10 +15,10 @@ namespace BitFrame\FastRoute\Test;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use BitFrame\Router\AbstractRouter;
-use BitFrame\FastRoute\Router;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface, UriInterface};
+use BitFrame\Router\AbstractRouter;
+use BitFrame\FastRoute\Router;
 use BitFrame\FastRoute\Exception\{
     RouteNotFoundException,
     MethodNotAllowedException,
