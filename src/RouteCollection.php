@@ -20,14 +20,14 @@ use BitFrame\FastRoute\Exception\{
 
 use function strlen;
 use function strpos;
+use function trim;
 use function rtrim;
 use function is_string;
 use function substr;
-use function count;
-use function trim;
 use function implode;
 use function array_map;
 use function array_chunk;
+use function count;
 use function round;
 use function ceil;
 use function max;
@@ -37,6 +37,9 @@ use function preg_split;
 use function preg_quote;
 use function preg_match;
 use function preg_match_all;
+
+use const PREG_OFFSET_CAPTURE;
+use const PREG_SET_ORDER;
 
 /**
  * Stores parsed routes.
@@ -60,10 +63,6 @@ REGEX;
 
     /**
      * Adds a route to the data generator.
-     *
-     * The handler doesn't necessarily need to be a callable, it
-     * can be arbitrary data that will be returned when the route
-     * matches.
      *
      * @param array $methods
      * @param string $routePath

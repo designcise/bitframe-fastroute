@@ -21,13 +21,9 @@ use function http_response_code;
  */
 class HttpException extends RuntimeException
 {
-    /**
-     * @param string $message
-     * @param int $code Status code
-     */
-    public function __construct(string $message, int $code = 500)
+    public function __construct(string $message, int $statusCode = 500)
     {
-        http_response_code($code);
-        parent::__construct($message, $code);
+        http_response_code($statusCode);
+        parent::__construct($message, $statusCode);
     }
 }
