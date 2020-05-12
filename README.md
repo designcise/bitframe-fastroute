@@ -17,7 +17,7 @@ Please note that this package requires PHP 7.4.0 or newer.
 
 ## Usage Example
 
-```
+```php
 use BitFrame\App;
 use BitFrame\Emitter\SapiEmitter;
 use BitFrame\FastRoute\Router;
