@@ -1,6 +1,5 @@
 {
     "name": "designcise/bitframe-fastroute",
-    "version": "2.0.0",
     "type": "library",
     "description": "FastRoute router middleware for BitFrame microframework",
     "license": "MIT",
