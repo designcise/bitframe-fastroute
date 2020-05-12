@@ -24,6 +24,9 @@ use BitFrame\FastRoute\Exception\{
     MethodNotAllowedException,
     BadRouteException
 };
+use RuntimeException;
+
+use function get_class;
 
 /**
  * @covers \BitFrame\FastRoute\Router
@@ -584,5 +587,44 @@ class RouterTest extends TestCase
         $result = $this->router->process($request->reveal(), $handler->reveal());
 
         $this->assertSame($response->reveal(), $result);
+    }
+
+    public function invalidControllerProvider(): array
+    {
+        return [
+            'non-existent method' => [[$this, 'nonExistentMethod']],
+            'unsupported uninstantiated class' => [get_class($this)],
+            'unsupported type (not callable, not string, not PSR-15' => [$this],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidControllerProvider
+     *
+     * @param $controller
+     */
+    public function testInvalidRouteControllerShouldThrowException($controller): void
+    {
+        $response = $this->prophesize(ResponseInterface::class);
+
+        $uri = $this->prophesize(UriInterface::class);
+        $uri->getPath()->willReturn('/foo/bar');
+
+        $request = $this->prophesize(ServerRequestInterface::class);
+        $request->getMethod()->willReturn('GET');
+        $request->getUri()->willReturn($uri);
+
+        $request->withAttribute(Argument::any(), Argument::any())->willReturn($request->reveal());
+
+        $handler = $this->prophesize(RequestHandlerInterface::class);
+        $handler->handle($request->reveal())->will([$response, 'reveal']);
+
+        $storedRoute[] = static fn ($request, $handler) => $handler->handle($request);
+
+        $this->router->map('GET', '/foo/bar', $controller);
+
+        $this->expectException(RuntimeException::class);
+
+        $this->router->process($request->reveal(), $handler->reveal());
     }
 }

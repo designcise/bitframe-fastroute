@@ -15,6 +15,8 @@ namespace BitFrame\FastRoute;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use BitFrame\Router\AbstractRouter;
+use TypeError;
+use RuntimeException;
 
 /**
  * FastRoute router to manage http routes as a middleware.
@@ -55,7 +57,12 @@ class Router extends AbstractRouter implements MiddlewareInterface
             $request = $request->withAttribute($name, $value);
         }
 
-        $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
+        try {
+            $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
+        } catch (TypeError $e) {
+            throw new RuntimeException('Route controller is invalid or does not exist');
+        }
+
         return $routeAsMiddleware->process($request, $handler);
     }
 
