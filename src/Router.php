@@ -18,6 +18,8 @@ use BitFrame\Router\AbstractRouter;
 use TypeError;
 use RuntimeException;
 
+use function is_array;
+
 /**
  * FastRoute router to manage http routes as a middleware.
  */
@@ -37,6 +39,10 @@ class Router extends AbstractRouter implements MiddlewareInterface
      */
     public function map($methods, string $path, $handler)
     {
+        $handler = (is_array($handler) && isset($handler[0], $handler[1], $handler[2]))
+            ? ControllerFactory::fromArray($handler)
+            : $handler;
+
         $this->routeCollection->add((array) $methods, $path, $handler);
     }
 

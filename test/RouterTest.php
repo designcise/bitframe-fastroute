@@ -17,6 +17,8 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface, UriInterface};
+use BitFrame\FastRoute\Test\Asset\Controller;
+use BitFrame\FastRoute\ControllerFactory;
 use BitFrame\Router\AbstractRouter;
 use BitFrame\FastRoute\Router;
 use BitFrame\FastRoute\Exception\{
@@ -38,6 +40,50 @@ class RouterTest extends TestCase
     public function setUp(): void
     {
         $this->router = new Router();
+    }
+
+    public function callableWithArgsProvider(): array
+    {
+        return [
+            'DI to instantiated object method' => [
+                [new Controller(), 'methodAction']
+            ],
+            'DI to static method' => [
+                [Controller::class, 'staticAction']
+            ],
+            'DI to static method in instantiated object' => [
+                [new Controller(), 'staticAction']
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider callableWithArgsProvider
+     *
+     * @param array $args
+     */
+    public function testMapHandlerWithArgs(array $args): void
+    {
+        $args[] = 'test';
+
+        $this->router->map(['GET'], '/', $args);
+        $routeData = $this->router->getRouteCollection()->getRouteData('GET', '/');
+
+        $request = $this->getMockBuilder(ServerRequestInterface::class)
+            ->getMockForAbstractClass();
+
+        $response = $this->getMockBuilder(ResponseInterface::class)
+            ->getMockForAbstractClass();
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
+            ->onlyMethods(['handle'])
+            ->getMockForAbstractClass();
+
+        $handler->method('handle')->willReturn($response);
+
+        $this->expectOutputString('test');
+
+        $routeData[0]($request, $handler);
     }
 
     public function testDuplicateVariableNameError(): void
