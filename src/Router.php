@@ -37,8 +37,11 @@ class Router extends AbstractRouter implements MiddlewareInterface
      *
      * @throws Exception\BadRouteException
      */
-    public function map($methods, string $path, $handler)
-    {
+    public function map(
+        array|string $methods,
+        string $path,
+        callable|string|array|MiddlewareInterface $handler
+    ) {
         $handler = (is_array($handler) && isset($handler[0], $handler[1], $handler[2]))
             ? ControllerFactory::fromArray($handler)
             : $handler;

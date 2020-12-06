@@ -19,7 +19,7 @@ use BitFrame\FastRoute\Exception\{
 };
 
 use function strlen;
-use function strpos;
+use function str_contains;
 use function trim;
 use function rtrim;
 use function is_string;
@@ -68,7 +68,7 @@ REGEX;
      * @param string $routePath
      * @param mixed $handler
      */
-    public function add(array $methods, string $routePath, $handler): void
+    public function add(array $methods, string $routePath, mixed $handler): void
     {
         $routePathTokens = $this->parsePath($routePath);
 
@@ -197,7 +197,7 @@ REGEX;
      *
      * @throws BadRouteException
      */
-    private function addStaticRoute(string $method, string $path, $handler): void
+    private function addStaticRoute(string $method, string $path, mixed $handler): void
     {
         if (isset($this->staticRoutes[$method][$path])) {
             throw new BadRouteException(sprintf(
@@ -233,7 +233,7 @@ REGEX;
      *
      * @throws BadRouteException
      */
-    private function addVariableRoute(string $method, array $pathData, $handler): void
+    private function addVariableRoute(string $method, array $pathData, mixed $handler): void
     {
         [$regex, $vars] = self::buildRegexForRoute($pathData);
 
@@ -256,7 +256,7 @@ REGEX;
     private static function regexHasCapturingGroups(string $regex): bool
     {
         // needs to have at least a ( to contain a capturing group
-        return strpos($regex, '(') !== false
+        return str_contains($regex, '(')
             // semi-accurate detection for capturing groups
             && (bool) preg_match(
                 '~
