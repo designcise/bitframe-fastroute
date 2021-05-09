@@ -14,11 +14,11 @@ namespace BitFrame\FastRoute\Test;
 
 use Generator;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Argument;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface, UriInterface};
 use BitFrame\FastRoute\Test\Asset\Controller;
-use BitFrame\FastRoute\ControllerFactory;
 use BitFrame\Router\AbstractRouter;
 use BitFrame\FastRoute\Router;
 use BitFrame\FastRoute\Exception\{
@@ -35,6 +35,8 @@ use function get_class;
  */
 class RouterTest extends TestCase
 {
+    use ProphecyTrait;
+
     private Router $router;
 
     public function setUp(): void
