@@ -640,7 +640,6 @@ class RouterTest extends TestCase
         return [
             'non-existent method' => [[$this, 'nonExistentMethod']],
             'unsupported uninstantiated class' => [get_class($this)],
-            'unsupported type (not callable, not string, not PSR-15' => [$this],
         ];
     }
 
