@@ -13,7 +13,7 @@ Install using composer:
 $ composer require designcise/bitframe-fastroute
 ```
 
-Please note that this package requires PHP 7.4.0 or newer.
+Please note that this package requires PHP 8.0 or newer.
 
 ## Usage Example
 
