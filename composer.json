@@ -12,7 +12,11 @@
     "require": {
         "php": ">=7.4.0",
         "psr/http-server-middleware": "~1.0",
+<<<<<<< Updated upstream
         "designcise/bitframe": "^2.0"
+=======
+        "designcise/bitframe": "^3.5"
+>>>>>>> Stashed changes
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5",
