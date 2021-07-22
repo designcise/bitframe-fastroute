@@ -21,7 +21,7 @@ use InvalidArgumentException;
 use function array_shift;
 use function sprintf;
 use function is_object;
-use function get_class;
+use function is_string;
 
 /**
  * Creates a new Controller with specified arguments.
@@ -61,12 +61,13 @@ class ControllerFactory
         if (! method_exists($classOrObj, $method)) {
             throw new RuntimeException(sprintf(
                 '"%s::%s()" does not exist',
-                (is_object($classOrObj)) ? get_class($classOrObj) : (string) $classOrObj,
+                (is_object($classOrObj)) ? $classOrObj::class : (string) $classOrObj,
                 $method
             ));
         }
 
-        return self::fromCallable([$classOrObj, $method], $controller);
+        $callable = (is_string($classOrObj)) ? new $classOrObj() : $classOrObj;
+        return self::fromCallable([$callable, $method], $controller);
     }
 
     public static function fromCallable(callable $controller, array $args = []): callable
@@ -75,7 +76,7 @@ class ControllerFactory
             return $controller;
         }
 
-        return fn (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface => (
+        return static fn (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface => (
             $controller($request, $handler, ...$args)
         );
     }

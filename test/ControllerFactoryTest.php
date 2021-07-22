@@ -60,6 +60,9 @@ class ControllerFactoryTest extends TestCase
             'DI to instantiated object method' => [
                 [new Controller(), 'methodAction']
             ],
+            'DI to instantiated object method given string class' => [
+                [Controller::class, 'methodAction']
+            ],
             'DI to static method' => [
                 [Controller::class, 'staticAction']
             ],
