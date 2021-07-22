@@ -365,7 +365,7 @@ class RouterTest extends TestCase
         string $uri,
         callable $callback,
         string $handler,
-        array $argDict
+        array $argDict,
     ): void {
         $callback($this->router);
         $results = $this->router->getRouteCollection()->getRouteData($method, $uri);
@@ -532,7 +532,7 @@ class RouterTest extends TestCase
     public function testMethodNotAllowedDispatches(
         string $method,
         string $uri,
-        callable $callback
+        callable $callback,
     ): void {
         $this->expectException(MethodNotAllowedException::class);
 
@@ -599,7 +599,7 @@ class RouterTest extends TestCase
     public function testProcess(
         array $storedRoute,
         array $requestedRoute,
-        callable $getRouteVars
+        callable $getRouteVars,
     ): void {
         $response = $this->prophesize(ResponseInterface::class);
 
@@ -642,7 +642,6 @@ class RouterTest extends TestCase
         return [
             'non-existent method' => [[$this, 'nonExistentMethod']],
             'unsupported uninstantiated class' => [get_class($this)],
-            'unsupported type (not callable, not string, not PSR-15' => [$this],
         ];
     }
 

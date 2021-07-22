@@ -19,9 +19,6 @@ use function sprintf;
  */
 class RouteNotFoundException extends HttpException
 {
-    /**
-     * @param string $type
-     */
     public function __construct(string $type)
     {
         parent::__construct(sprintf('Route "%s" cannot be found', $type), 404);

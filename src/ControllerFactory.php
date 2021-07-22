@@ -32,7 +32,9 @@ class ControllerFactory
     {
         if (! method_exists($className, $method)) {
             throw new RuntimeException(sprintf(
-                '"%s::%s()" does not exist', $className, $method
+                '"%s::%s()" does not exist',
+                $className,
+                $method
             ));
         }
 

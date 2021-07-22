@@ -19,9 +19,6 @@ use function sprintf;
  */
 class MethodNotAllowedException extends HttpException
 {
-    /**
-     * @param string $method Name of the method
-     */
     public function __construct(string $method)
     {
         parent::__construct(sprintf('Method "%s" Not Allowed', $method), 405);

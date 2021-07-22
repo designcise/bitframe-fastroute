@@ -209,9 +209,8 @@ class ControllerFactoryTest extends TestCase
      *
      * @param callable $callable
      */
-    public function testFromCallableWithoutArgsShouldNotWrapCallable(
-        callable $callable
-    ): void {
+    public function testFromCallableWithoutArgsShouldNotWrapCallable(callable $callable): void
+    {
         $this->assertSame($callable, ControllerFactory::fromCallable($callable));
     }
 

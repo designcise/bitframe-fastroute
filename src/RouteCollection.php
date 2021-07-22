@@ -184,7 +184,7 @@ REGEX;
                 $this->allowedMethods[$uri][] = $method;
             }
         }
-        
+
         return $this->allowedMethods[$uri];
     }
 
@@ -349,7 +349,7 @@ REGEX;
                 // pattern
                 isset($match[2][0]) ? trim($match[2][0]) : '[^/]+',
             ];
-            
+
             $index = $offset + strlen($match[0][0]);
         }
 
@@ -387,7 +387,7 @@ REGEX;
 
     private static function generateVariableRouteData(
         array $routeData,
-        string $method
+        string $method,
     ): array {
         if (empty($routeData)) {
             return [];
@@ -407,7 +407,7 @@ REGEX;
     private static function getVariableRouteData(
         array $routeData,
         string $method,
-        string $uri
+        string $uri,
     ): array {
         $generatedRouteData = self::generateVariableRouteData($routeData, $method);
         $routeMethodData = $generatedRouteData[$method] ?? [];

@@ -293,7 +293,7 @@ class RouteCollectionTest extends TestCase
     public function testGetAllowedMethods(
         array $storedRoute,
         string $requestedPath,
-        ?array $expectedMethods = null
+        ?array $expectedMethods = null,
     ): void {
         $storedRoute[] = static fn ($request, $handler) => $handler->handle($request);
         $this->routeCollection->add(...$storedRoute);
@@ -467,7 +467,7 @@ class RouteCollectionTest extends TestCase
     public function testGetRouteData(
         array $storedRoute,
         array $requestedRoute,
-        array $expectedVars = []
+        array $expectedVars = [],
     ): void {
         $storedHandler = static fn ($request, $handler) => $handler->handle($request);
         $storedRoute[] = $storedHandler;
@@ -561,7 +561,7 @@ class RouteCollectionTest extends TestCase
      */
     public function testGetRouteDataDoesThrowRouteNotFoundException(
         array $storedRoute,
-        array $requestedRoute
+        array $requestedRoute,
     ): void {
         $storedHandler = static fn ($request, $handler) => $handler->handle($request);
         $storedRoute[] = $storedHandler;
@@ -602,7 +602,7 @@ class RouteCollectionTest extends TestCase
      */
     public function testGetRouteDataDoesThrowMethodNotAllowedException(
         array $storedRoute,
-        array $requestedRoute
+        array $requestedRoute,
     ): void {
         $storedHandler = static fn ($request, $handler) => $handler->handle($request);
         $storedRoute[] = $storedHandler;
@@ -639,7 +639,7 @@ class RouteCollectionTest extends TestCase
      */
     public function testShouldThrowExceptionWhenUsingVariableTwice(
         string $storedPath,
-        string $requestedPath
+        string $requestedPath,
     ): void {
         $handler = static fn ($request, $handler) => $handler->handle($request);
         $this->routeCollection->add(['GET'], $storedPath, $handler);
@@ -666,9 +666,8 @@ class RouteCollectionTest extends TestCase
      *
      * @param string $path
      */
-    public function testShouldThrowExceptionWhenPathPlaceholderHasCapturingGroup(
-        string $path
-    ): void {
+    public function testShouldThrowExceptionWhenPathPlaceholderHasCapturingGroup(string $path): void
+    {
         $this->expectException(BadRouteException::class);
         $handler = static fn ($request, $handler) => $handler->handle($request);
         $this->routeCollection->add(['GET'], $path, $handler);
