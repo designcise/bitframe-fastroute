@@ -25,9 +25,11 @@ use function is_array;
  */
 class Router extends AbstractRouter implements MiddlewareInterface
 {
-    public function __construct(
-        private RouteCollection $routeCollection = new RouteCollection(),
-    ) {
+    private RouteCollection $routeCollection;
+
+    public function __construct()
+    {
+        $this->routeCollection = new RouteCollection();
     }
 
     /**
