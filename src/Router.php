@@ -27,7 +27,8 @@ class Router extends AbstractRouter implements MiddlewareInterface
 {
     public function __construct(
         private RouteCollection $routeCollection = new RouteCollection(),
-    ) {}
+    ) {
+    }
 
     /**
      * {@inheritdoc}
