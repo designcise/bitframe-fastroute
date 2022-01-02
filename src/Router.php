@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2021 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2022 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -68,7 +68,7 @@ class Router extends AbstractRouter implements MiddlewareInterface
 
         try {
             $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
-        } catch (TypeError $e) {
+        } catch (TypeError) {
             throw new RuntimeException('Route controller is invalid or does not exist');
         }
 
