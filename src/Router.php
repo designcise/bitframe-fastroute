@@ -25,12 +25,9 @@ use function is_array;
  */
 class Router extends AbstractRouter implements MiddlewareInterface
 {
-    private RouteCollection $routeCollection;
-
-    public function __construct()
-    {
-        $this->routeCollection = new RouteCollection();
-    }
+    public function __construct(
+        private RouteCollection $routeCollection = new RouteCollection(),
+    ) {}
 
     /**
      * {@inheritdoc}
@@ -68,7 +65,7 @@ class Router extends AbstractRouter implements MiddlewareInterface
 
         try {
             $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
-        } catch (TypeError $e) {
+        } catch (TypeError) {
             throw new RuntimeException('Route controller is invalid or does not exist');
         }
 
