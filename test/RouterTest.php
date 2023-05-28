@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace BitFrame\FastRoute\Test;
 
+use BitFrame\FastRoute\ControllerFactory;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -42,6 +43,36 @@ class RouterTest extends TestCase
     public function setUp(): void
     {
         $this->router = new Router();
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public function testAddRoutesWithAttribute()
+    {
+        $this->router->addRoutes([
+            ControllerFactory::create(Controller::class, 'test'),
+        ]);
+
+        $this->expectOutputString('test');
+
+        $routeData = $this->router->getRouteCollection()->getRouteData('GET', '/test');
+
+        $request = $this->getMockBuilder(ServerRequestInterface::class)
+            ->getMockForAbstractClass();
+
+        $response = $this->getMockBuilder(ResponseInterface::class)
+            ->getMockForAbstractClass();
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
+            ->onlyMethods(['handle'])
+            ->getMockForAbstractClass();
+
+        $handler->method('handle')->willReturn($response);
+
+        $this->expectOutputString('test');
+
+        $routeData[0]($request, $handler);
     }
 
     public function callableWithArgsProvider(): array

@@ -12,6 +12,10 @@ declare(strict_types=1);
 
 namespace BitFrame\FastRoute;
 
+use Attribute;
+use BitFrame\FastRoute\Test\Asset\Controller;
+use ReflectionClass;
+use ReflectionMethod;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use BitFrame\Router\AbstractRouter;
@@ -67,12 +71,37 @@ class Router extends AbstractRouter implements MiddlewareInterface
         }
 
         try {
-            $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
+            $routeAsMiddleware = $this->createDecoratedMiddleware($route[0]);
         } catch (TypeError) {
             throw new RuntimeException('Route controller is invalid or does not exist');
         }
 
         return $routeAsMiddleware->process($request, $handler);
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public function addRoutes(array $controllers)
+    {
+        foreach ($controllers as $controller) {
+            $reflectionClass = new ReflectionClass($controller);
+            $reflectionMethods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+            foreach ($reflectionMethods as $method) {
+                $attributes = $method->getAttributes(Route::class);
+
+                foreach ($attributes as $attribute) {
+                    /** @var Route $route */
+                    $route = $attribute->newInstance();
+                    $this->routeCollection->add(
+                        $route->getMethods(),
+                        $route->getPath(),
+                        [$controller, $method->getName()],
+                    );
+                }
+            }
+        }
     }
 
     /**

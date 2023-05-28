@@ -80,4 +80,9 @@ class ControllerFactory
             $controller($request, $handler, ...$args)
         );
     }
+
+    public static function create(string $className, ...$args): callable
+    {
+        return new $className(...$args);
+    }
 }
