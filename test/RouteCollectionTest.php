@@ -26,15 +26,15 @@ use BitFrame\FastRoute\Exception\{
 class RouteCollectionTest extends TestCase
 {
     /** @var RouteCollection */
-    private $routeCollection;
+    private RouteCollection $routeCollection;
 
     public function setUp(): void
     {
-        $this->routeCollection = new RouteCollection;
+        $this->routeCollection = new RouteCollection();
     }
 
     /**
-     * @return mixed[]
+     * @return array
      */
     public function provideTestParse(): array
     {
