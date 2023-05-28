@@ -24,12 +24,12 @@ class RouteTest extends TestCase
     {
         return [
             'Simple GET route' => [
-                ['GET', ''],
+                ['GET', '/'],
                 ['GET', '/'],
             ],
             'Multiple methods with simple route' => [
                 [['GET', 'POST'], ''],
-                [['GET', 'POST'], '/'],
+                [['GET', 'POST'], ''],
             ],
             'Non-empty route' => [
                 ['PUT', '/foo-bar'],

@@ -23,7 +23,8 @@ class Controller
         return self::staticAction($request, $handler, $foo);
     }
 
-    #[Route(['GET'], '/test')]
+    #[Route(['GET', 'POST'], '/test')]
+    #[Route('POST', '/test-2')]
     public function indexAction(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler

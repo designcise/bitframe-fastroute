@@ -19,7 +19,7 @@ use function ltrim;
 /**
  * Single route.
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Route
 {
     /**
@@ -29,9 +29,7 @@ class Route
     public function __construct(
         protected array|string $methods,
         protected string $path,
-    ) {
-        $this->path = '/' . ltrim($path, '/');
-    }
+    ) {}
 
     public function getMethods(): array|string
     {

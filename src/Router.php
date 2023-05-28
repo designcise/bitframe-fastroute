@@ -94,7 +94,7 @@ class Router extends AbstractRouter implements MiddlewareInterface
                 foreach ($attributes as $attribute) {
                     /** @var Route $route */
                     $route = $attribute->newInstance();
-                    $this->routeCollection->add(
+                    $this->map(
                         $route->getMethods(),
                         $route->getPath(),
                         [$controller, $method->getName()],

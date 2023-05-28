@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace BitFrame\FastRoute\Test;
 
-use BitFrame\FastRoute\ControllerFactory;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -45,18 +44,36 @@ class RouterTest extends TestCase
         $this->router = new Router();
     }
 
+    public function attributeRouteProvider(): array
+    {
+        return [
+            'Route #1' => [
+                ['GET', '/test'],
+                'bar',
+            ],
+            'Same route with another method' => [
+                ['POST', '/test'],
+                'bar',
+            ],
+            'Repeat attribute on same method' => [
+                ['POST', '/test-2'],
+                'bar',
+            ],
+        ];
+    }
+
     /**
+     * @dataProvider attributeRouteProvider
+     *
      * @throws \ReflectionException
      */
-    public function testAddRoutesWithAttribute()
+    public function testAddRoutesWithAttribute(array $routeData, string $expectedOutput)
     {
         $this->router->addRoutes([
-            ControllerFactory::create(Controller::class, 'test'),
+            new Controller(),
         ]);
 
-        $this->expectOutputString('test');
-
-        $routeData = $this->router->getRouteCollection()->getRouteData('GET', '/test');
+        $routeData = $this->router->getRouteCollection()->getRouteData(...$routeData);
 
         $request = $this->getMockBuilder(ServerRequestInterface::class)
             ->getMockForAbstractClass();
@@ -70,7 +87,7 @@ class RouterTest extends TestCase
 
         $handler->method('handle')->willReturn($response);
 
-        $this->expectOutputString('test');
+        $this->expectOutputString($expectedOutput);
 
         $routeData[0]($request, $handler);
     }
