@@ -25,6 +25,23 @@ use InvalidArgumentException;
  */
 class ControllerFactoryTest extends TestCase
 {
+    public function testCreate(): void
+    {
+        $request = $this->getMockedRequest();
+        $response = $this->getMockedResponse();
+        $handler = $this->getMockedHandler($response);
+
+        $diArg = 'test';
+
+        $instance = ControllerFactory::create(Controller::class, $diArg);
+
+        $this->expectOutputString($diArg);
+
+        $controllerResponse = $instance->indexAction($request, $handler);
+
+        $this->assertSame($controllerResponse, $response);
+    }
+
     public function testFromShouldThrowExceptionWhenMethodDoesNotExist(): void
     {
         $this->expectException(RuntimeException::class);
