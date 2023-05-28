@@ -82,7 +82,7 @@ class Router extends AbstractRouter implements MiddlewareInterface
     /**
      * @throws \ReflectionException
      */
-    public function addRoutes(array $controllers)
+    public function registerControllers(array $controllers)
     {
         foreach ($controllers as $controller) {
             $reflectionClass = new ReflectionClass($controller);

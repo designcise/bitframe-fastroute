@@ -69,7 +69,7 @@ class RouterTest extends TestCase
      */
     public function testAddRoutesWithAttribute(array $routeData, string $expectedOutput)
     {
-        $this->router->addRoutes([
+        $this->router->registerControllers([
             new Controller(),
         ]);
 
