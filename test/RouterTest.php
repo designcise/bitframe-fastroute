@@ -47,15 +47,15 @@ class RouterTest extends TestCase
     public function attributeRouteProvider(): array
     {
         return [
-            'Route #1' => [
+            'Attribute Route' => [
                 ['GET', '/test'],
                 'bar',
             ],
-            'Same route with another method' => [
+            'Same Attribute Route with another method' => [
                 ['POST', '/test'],
                 'bar',
             ],
-            'Repeat attribute on same method' => [
+            'Multiple Route attributes on same method' => [
                 ['POST', '/test-2'],
                 'bar',
             ],
