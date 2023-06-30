@@ -34,6 +34,7 @@ class Controller
     }
 
     #[Route(['GET'], '/test2')]
+    #[Route(['GET'], '/test/{param:\d+}')]
     public function methodAction(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler,

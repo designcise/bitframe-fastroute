@@ -59,6 +59,10 @@ class RouterTest extends TestCase
                 ['POST', '/test-2'],
                 'bar',
             ],
+            'Route attribute with pattern' => [
+                ['GET', '/test/123'],
+                'bar',
+            ],
         ];
     }
 
@@ -88,6 +92,44 @@ class RouterTest extends TestCase
         $handler->method('handle')->willReturn($response);
 
         $this->expectOutputString($expectedOutput);
+
+        $routeData[0]($request, $handler);
+    }
+
+    public function invalidAttributeRouteProvider(): array
+    {
+        return [
+            'Non-existent Route' => [['GET', '/non-existent']],
+            'Route attribute does not match pattern' => [['GET', '/test/abc']],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidAttributeRouteProvider
+     *
+     * @throws \ReflectionException
+     */
+    public function testAddNonExistentRoutesWithAttributeThrowsError($routeData)
+    {
+        $this->router->registerControllers([
+            new Controller(),
+        ]);
+
+        $this->expectException(RouteNotFoundException::class);
+
+        $routeData = $this->router->getRouteCollection()->getRouteData(...$routeData);
+
+        $request = $this->getMockBuilder(ServerRequestInterface::class)
+            ->getMockForAbstractClass();
+
+        $response = $this->getMockBuilder(ResponseInterface::class)
+            ->getMockForAbstractClass();
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
+            ->onlyMethods(['handle'])
+            ->getMockForAbstractClass();
+
+        $handler->method('handle')->willReturn($response);
 
         $routeData[0]($request, $handler);
     }
