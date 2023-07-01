@@ -18,7 +18,7 @@ Please note that this package requires PHP 8.2.0 or newer.
 
 ## Examples
 
-### Usage Example With Attributes
+### Using Attributes for Route Declaration
 
 ```php
 class SomeController
@@ -60,7 +60,7 @@ $app->run([
 ]);
 ```
 
-### Usage Example With Callback Handler
+### Using Inline Callback to Handle Route
 
 ```php
 use BitFrame\App;
