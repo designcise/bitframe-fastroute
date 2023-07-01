@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2022 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2023 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -25,6 +25,23 @@ use InvalidArgumentException;
  */
 class ControllerFactoryTest extends TestCase
 {
+    public function testCreate(): void
+    {
+        $request = $this->getMockedRequest();
+        $response = $this->getMockedResponse();
+        $handler = $this->getMockedHandler($response);
+
+        $diArg = 'test';
+
+        $instance = ControllerFactory::create(Controller::class, $diArg);
+
+        $this->expectOutputString($diArg);
+
+        $controllerResponse = $instance->indexAction($request, $handler);
+
+        $this->assertSame($controllerResponse, $response);
+    }
+
     public function testFromShouldThrowExceptionWhenMethodDoesNotExist(): void
     {
         $this->expectException(RuntimeException::class);

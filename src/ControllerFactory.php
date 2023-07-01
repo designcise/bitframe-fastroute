@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2022 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2023 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -79,5 +79,10 @@ class ControllerFactory
         return static fn (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface => (
             $controller($request, $handler, ...$args)
         );
+    }
+
+    public static function create(string $className, ...$args): object
+    {
+        return new $className(...$args);
     }
 }

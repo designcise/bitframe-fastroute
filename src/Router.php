@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2022 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2023 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -14,7 +14,7 @@ namespace BitFrame\FastRoute;
 
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
-use BitFrame\Router\AbstractRouter;
+use BitFrame\Router\{AbstractRouter, AttributeRouteTrait, ResponseRouteTrait};
 use TypeError;
 use RuntimeException;
 
@@ -25,6 +25,9 @@ use function is_array;
  */
 class Router extends AbstractRouter implements MiddlewareInterface
 {
+    use AttributeRouteTrait;
+    use ResponseRouteTrait;
+
     private RouteCollection $routeCollection;
 
     public function __construct()
@@ -67,7 +70,7 @@ class Router extends AbstractRouter implements MiddlewareInterface
         }
 
         try {
-            $routeAsMiddleware = $this->getDecoratedMiddleware($route[0]);
+            $routeAsMiddleware = $this->createDecoratedMiddleware($route[0]);
         } catch (TypeError) {
             throw new RuntimeException('Route controller is invalid or does not exist');
         }

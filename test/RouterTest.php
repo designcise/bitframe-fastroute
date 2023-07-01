@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2022 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2023 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -42,6 +42,108 @@ class RouterTest extends TestCase
     public function setUp(): void
     {
         $this->router = new Router();
+    }
+
+    public function attributeRouteProvider(): array
+    {
+        return [
+            'Attribute Route' => [
+                ['GET', '/test'],
+                'bar',
+            ],
+            'Same Attribute Route with another method' => [
+                ['POST', '/test'],
+                'bar',
+            ],
+            'Multiple Route attributes on same method' => [
+                ['POST', '/test-2'],
+                'bar',
+            ],
+            'Route attribute with pattern' => [
+                ['GET', '/test/123'],
+                'bar',
+            ],
+            'Route declared on a static method' => [
+                ['PUT', '/static-method'],
+                'bar',
+            ],
+            'Route with optional path without optional part added' => [
+                ['PATCH', '/foo'],
+                'bar',
+            ],
+            'Route with optional path with optional part added' => [
+                ['PATCH', '/foobar'],
+                'bar',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider attributeRouteProvider
+     *
+     * @throws \ReflectionException
+     */
+    public function testAddRoutesWithAttribute(array $routeData, string $expectedOutput)
+    {
+        $this->router->registerControllers([
+            new Controller(),
+        ]);
+
+        $routeData = $this->router->getRouteCollection()->getRouteData(...$routeData);
+
+        $request = $this->getMockBuilder(ServerRequestInterface::class)
+            ->getMockForAbstractClass();
+
+        $response = $this->getMockBuilder(ResponseInterface::class)
+            ->getMockForAbstractClass();
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
+            ->onlyMethods(['handle'])
+            ->getMockForAbstractClass();
+
+        $handler->method('handle')->willReturn($response);
+
+        $this->expectOutputString($expectedOutput);
+
+        $routeData[0]($request, $handler);
+    }
+
+    public function invalidAttributeRouteProvider(): array
+    {
+        return [
+            'Non-existent Route' => [['GET', '/non-existent']],
+            'Route attribute does not match pattern' => [['GET', '/test/abc']],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidAttributeRouteProvider
+     *
+     * @throws \ReflectionException
+     */
+    public function testAddNonExistentRoutesWithAttributeThrowsError($routeData)
+    {
+        $this->router->registerControllers([
+            new Controller(),
+        ]);
+
+        $this->expectException(RouteNotFoundException::class);
+
+        $routeData = $this->router->getRouteCollection()->getRouteData(...$routeData);
+
+        $request = $this->getMockBuilder(ServerRequestInterface::class)
+            ->getMockForAbstractClass();
+
+        $response = $this->getMockBuilder(ResponseInterface::class)
+            ->getMockForAbstractClass();
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
+            ->onlyMethods(['handle'])
+            ->getMockForAbstractClass();
+
+        $handler->method('handle')->willReturn($response);
+
+        $routeData[0]($request, $handler);
     }
 
     public function callableWithArgsProvider(): array

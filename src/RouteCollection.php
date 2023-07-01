@@ -74,7 +74,7 @@ REGEX;
 
         foreach ($methods as $method) {
             foreach ($routePathTokens as $path) {
-                if (count($path) === 1 && is_string($path[0])) {
+                if ($this->isStaticRoute($path)) {
                     $this->addStaticRoute($method, $path[0], $handler);
                     continue;
                 }
@@ -186,6 +186,11 @@ REGEX;
         }
 
         return $this->allowedMethods[$uri];
+    }
+
+    private function isStaticRoute(array $path): bool
+    {
+        return count($path) === 1 && is_string($path[0]);
     }
 
     /**
@@ -399,7 +404,7 @@ REGEX;
         $chunkSize = (int) ceil($count / $numParts);
         $chunks = array_chunk($routeData, $chunkSize, true);
 
-        $data[$method] = array_map('self::processRouteChunks', $chunks);
+        $data[$method] = array_map([RouteCollection::class, 'processRouteChunks'], $chunks);
 
         return $data;
     }

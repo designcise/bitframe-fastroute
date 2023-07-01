@@ -4,7 +4,7 @@
  * BitFrame Framework (https://www.bitframephp.com)
  *
  * @author    Daniyal Hamid
- * @copyright Copyright (c) 2017-2022 Daniyal Hamid (https://designcise.com)
+ * @copyright Copyright (c) 2017-2023 Daniyal Hamid (https://designcise.com)
  * @license   https://bitframephp.com/about/license MIT License
  */
 
@@ -26,15 +26,15 @@ use BitFrame\FastRoute\Exception\{
 class RouteCollectionTest extends TestCase
 {
     /** @var RouteCollection */
-    private $routeCollection;
+    private RouteCollection $routeCollection;
 
     public function setUp(): void
     {
-        $this->routeCollection = new RouteCollection;
+        $this->routeCollection = new RouteCollection();
     }
 
     /**
-     * @return mixed[]
+     * @return array
      */
     public function provideTestParse(): array
     {

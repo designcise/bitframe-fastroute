@@ -4,15 +4,12 @@ namespace BitFrame\FastRoute\Test\Asset;
 
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\RequestHandlerInterface;
+use BitFrame\Router\Route;
 
 class Controller
 {
-    private string $foo;
-
-    public function __construct(string $foo = 'bar')
-    {
-        $this->foo = $foo;
-    }
+    public function __construct(private readonly string $foo = 'bar')
+    {}
 
     public function __invoke(
         ServerRequestInterface $request,
@@ -22,14 +19,19 @@ class Controller
         return self::staticAction($request, $handler, $foo);
     }
 
+    #[Route(['GET', 'POST'], '/test')]
+    #[Route('POST', '/test-2')]
     public function indexAction(
         ServerRequestInterface $request,
-        RequestHandlerInterface $handler
+        RequestHandlerInterface $handler,
     ): ResponseInterface {
         echo $this->foo;
         return $handler->handle($request);
     }
 
+    #[Route(['GET'], '/test2')]
+    #[Route(['GET'], '/test/{param:\d+}')]
+    #[Route(['PATCH'], '/foo[bar]')]
     public function methodAction(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler,
@@ -38,6 +40,7 @@ class Controller
         return self::staticAction($request, $handler, $foo);
     }
 
+    #[Route('PUT', '/static-method')]
     public static function staticAction(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler,

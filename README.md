@@ -1,7 +1,8 @@
 # BitFrame\FastRoute
 
-[![codecov](https://codecov.io/gh/designcise/bitframe-fastroute/branch/master/graph/badge.svg)](https://codecov.io/gh/designcise/bitframe-fastroute)
-[![Build Status](https://travis-ci.com/designcise/bitframe-fastroute.svg?branch=master)](https://travis-ci.com/designcise/bitframe-fastroute)
+[![CI](https://github.com/designcise/bitframe-fastroute/actions/workflows/ci.yml/badge.svg)](https://github.com/designcise/bitframe-fastroute/actions/workflows/ci.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b4f08707fc26da971047/maintainability)](https://codeclimate.com/github/designcise/bitframe-fastroute/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b4f08707fc26da971047/test_coverage)](https://codeclimate.com/github/designcise/bitframe-fastroute/test_coverage)
 
 FastRoute wrapper class to manage http routes as a middleware.
 
@@ -13,9 +14,53 @@ Install using composer:
 $ composer require designcise/bitframe-fastroute
 ```
 
-Please note that this package requires PHP 8.1.0 or newer.
+Please note that this package requires PHP 8.2.0 or newer.
 
-## Usage Example
+## Examples
+
+### Using Attributes for Route Declaration
+
+```php
+class SomeController
+{
+    #[Route(['GET'], '/hello/123')]
+    public function indexAction(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler,
+    ): ResponseInterface {
+        $response = $handler->handle($request);
+        $response->getBody()->write(
+            "BitFramePHP - 👋 Build Something Amazing Today!"
+        );
+
+        return $response;
+    }
+}
+```
+
+```php
+use BitFrame\App;
+use BitFrame\Emitter\SapiEmitter;
+use BitFrame\FastRoute\Router;
+use SomeController;
+
+require 'vendor/autoload.php';
+
+$app = new App();
+$router = new Router();
+
+$router->registerControllers([
+    new SomeController(),
+]);
+
+$app->run([
+    SapiEmitter::class,
+    $router,
+    // ...
+]);
+```
+
+### Using Inline Callback to Handle Route
 
 ```php
 use BitFrame\App;
