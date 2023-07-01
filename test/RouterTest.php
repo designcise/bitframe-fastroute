@@ -67,6 +67,14 @@ class RouterTest extends TestCase
                 ['PUT', '/static-method'],
                 'bar',
             ],
+            'Route with optional path without optional part added' => [
+                ['PATCH', '/foo'],
+                'bar',
+            ],
+            'Route with optional path with optional part added' => [
+                ['PATCH', '/foobar'],
+                'bar',
+            ],
         ];
     }
 

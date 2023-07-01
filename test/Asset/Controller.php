@@ -31,6 +31,7 @@ class Controller
 
     #[Route(['GET'], '/test2')]
     #[Route(['GET'], '/test/{param:\d+}')]
+    #[Route(['PATCH'], '/foo[bar]')]
     public function methodAction(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler,
