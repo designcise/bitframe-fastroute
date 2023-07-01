@@ -81,7 +81,7 @@ class ControllerFactory
         );
     }
 
-    public static function create(string $className, ...$args): callable
+    public static function create(string $className, ...$args): object
     {
         return new $className(...$args);
     }
