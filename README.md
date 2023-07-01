@@ -16,7 +16,9 @@ $ composer require designcise/bitframe-fastroute
 
 Please note that this package requires PHP 8.2.0 or newer.
 
-## Usage Example With Attributes
+## Examples
+
+### Usage Example With Attributes
 
 ```php
 class SomeController
@@ -58,7 +60,7 @@ $app->run([
 ]);
 ```
 
-## Usage Example With Callback Handler
+### Usage Example With Callback Handler
 
 ```php
 use BitFrame\App;
