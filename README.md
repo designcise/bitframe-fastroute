@@ -16,7 +16,49 @@ $ composer require designcise/bitframe-fastroute
 
 Please note that this package requires PHP 8.2.0 or newer.
 
-## Usage Example
+## Usage Example With Attributes
+
+```php
+class SomeController
+{
+    #[Route(['GET'], '/hello/123')]
+    public function indexAction(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler,
+    ): ResponseInterface {
+        $response = $handler->handle($request);
+        $response->getBody()->write(
+            "BitFramePHP - 👋 Build Something Amazing Today!"
+        );
+
+        return $response;
+    }
+}
+```
+
+```php
+use BitFrame\App;
+use BitFrame\Emitter\SapiEmitter;
+use BitFrame\FastRoute\Router;
+use SomeController;
+
+require 'vendor/autoload.php';
+
+$app = new App();
+$router = new Router();
+
+$router->registerControllers([
+    new SomeController(),
+]);
+
+$app->run([
+    SapiEmitter::class,
+    $router,
+    // ...
+]);
+```
+
+## Usage Example With Callback Handler
 
 ```php
 use BitFrame\App;
