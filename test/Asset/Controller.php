@@ -8,12 +8,8 @@ use BitFrame\FastRoute\Route;
 
 class Controller
 {
-    private string $foo;
-
-    public function __construct(string $foo = 'bar')
-    {
-        $this->foo = $foo;
-    }
+    public function __construct(private readonly string $foo = 'bar')
+    {}
 
     public function __invoke(
         ServerRequestInterface $request,
@@ -27,7 +23,7 @@ class Controller
     #[Route('POST', '/test-2')]
     public function indexAction(
         ServerRequestInterface $request,
-        RequestHandlerInterface $handler
+        RequestHandlerInterface $handler,
     ): ResponseInterface {
         echo $this->foo;
         return $handler->handle($request);
