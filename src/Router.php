@@ -79,28 +79,10 @@ class Router extends AbstractRouter implements MiddlewareInterface
         return $routeAsMiddleware->process($request, $handler);
     }
 
-    /**
-     * @throws \ReflectionException
-     */
     public function registerControllers(array $controllers)
     {
         foreach ($controllers as $controller) {
-            $reflectionClass = new ReflectionClass($controller);
-            $reflectionMethods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-
-            foreach ($reflectionMethods as $method) {
-                $attributes = $method->getAttributes(Route::class);
-
-                foreach ($attributes as $attribute) {
-                    /** @var Route $route */
-                    $route = $attribute->newInstance();
-                    $this->map(
-                        $route->getMethods(),
-                        $route->getPath(),
-                        [$controller, $method->getName()],
-                    );
-                }
-            }
+            $this->registerControllerRoutes($controller);
         }
     }
 
@@ -110,5 +92,30 @@ class Router extends AbstractRouter implements MiddlewareInterface
     public function getRouteCollection(): RouteCollection
     {
         return $this->routeCollection;
+    }
+
+    private function registerControllerRoutes($controller)
+    {
+        $reflectionClass = new ReflectionClass($controller);
+        $reflectionMethods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        foreach ($reflectionMethods as $method) {
+            $this->registerMethodRoutes($controller, $method);
+        }
+    }
+
+    private function registerMethodRoutes($controller, $method)
+    {
+        $attributes = $method->getAttributes(Route::class);
+
+        foreach ($attributes as $attribute) {
+            /** @var Route $route */
+            $route = $attribute->newInstance();
+            $this->map(
+                $route->getMethods(),
+                $route->getPath(),
+                [$controller, $method->getName()],
+            );
+        }
     }
 }
