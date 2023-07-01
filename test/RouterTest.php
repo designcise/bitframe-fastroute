@@ -63,6 +63,10 @@ class RouterTest extends TestCase
                 ['GET', '/test/123'],
                 'bar',
             ],
+            'Route declared on a static method' => [
+                ['PUT', '/static-method'],
+                'bar',
+            ],
         ];
     }
 

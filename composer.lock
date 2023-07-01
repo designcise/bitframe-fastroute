@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/designcise/bitframe.git",
-                "reference": "e0f0afa81399f294beca8be98dc4913c5e339a5c"
+                "reference": "6e80467879d83830cf1d932bc78e9754b8b297fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/designcise/bitframe/zipball/e0f0afa81399f294beca8be98dc4913c5e339a5c",
-                "reference": "e0f0afa81399f294beca8be98dc4913c5e339a5c",
+                "url": "https://api.github.com/repos/designcise/bitframe/zipball/6e80467879d83830cf1d932bc78e9754b8b297fc",
+                "reference": "6e80467879d83830cf1d932bc78e9754b8b297fc",
                 "shasum": ""
             },
             "require": {
@@ -64,7 +64,7 @@
                 "issues": "https://github.com/designcise/bitframe/issues",
                 "source": "https://github.com/designcise/bitframe/tree/4.x"
             },
-            "time": "2023-06-30T23:38:59+00:00"
+            "time": "2023-07-01T21:12:31+00:00"
         },
         {
             "name": "psr/container",

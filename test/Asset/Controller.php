@@ -4,7 +4,7 @@ namespace BitFrame\FastRoute\Test\Asset;
 
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Http\Server\RequestHandlerInterface;
-use BitFrame\FastRoute\Route;
+use BitFrame\Router\Route;
 
 class Controller
 {
@@ -39,6 +39,7 @@ class Controller
         return self::staticAction($request, $handler, $foo);
     }
 
+    #[Route('PUT', '/static-method')]
     public static function staticAction(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler,
