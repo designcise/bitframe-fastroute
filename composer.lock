@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a37a31863d6b3175c927d232288e869",
+    "content-hash": "1dc190147ae7a0070635d1fae4a0c65a",
     "packages": [
         {
             "name": "designcise/bitframe",
-            "version": "4.x-dev",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/designcise/bitframe.git",
-                "reference": "6e80467879d83830cf1d932bc78e9754b8b297fc"
+                "reference": "0618b80a5ecbb8707ac1f58c14fbb99faa54c878"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/designcise/bitframe/zipball/6e80467879d83830cf1d932bc78e9754b8b297fc",
-                "reference": "6e80467879d83830cf1d932bc78e9754b8b297fc",
+                "url": "https://api.github.com/repos/designcise/bitframe/zipball/0618b80a5ecbb8707ac1f58c14fbb99faa54c878",
+                "reference": "0618b80a5ecbb8707ac1f58c14fbb99faa54c878",
                 "shasum": ""
             },
             "require": {
@@ -62,9 +62,9 @@
             "description": "BitFrame PHP microframework",
             "support": {
                 "issues": "https://github.com/designcise/bitframe/issues",
-                "source": "https://github.com/designcise/bitframe/tree/4.x"
+                "source": "https://github.com/designcise/bitframe/tree/v4.0.0"
             },
-            "time": "2023-07-01T21:12:31+00:00"
+            "time": "2023-07-01T23:36:16+00:00"
         },
         {
             "name": "psr/container",
@@ -3576,7 +3576,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "designcise/bitframe": 20,
         "phpmd/phpmd": 0
     },
     "prefer-stable": false,
